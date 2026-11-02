@@ -484,7 +484,7 @@ function editForm(p){
   const isNew=!p; p=p||{category:curCat==="전체"?data.categories[0]:curCat,contacts:[{}]};
   openSheet(`<h2>${isNew?"거래처 추가":"거래처 수정"}</h2>
   <form id="pf">
-    <label class="f">카테고리</label>
+    <label class="f">카테고리 선택</label>
     <select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select>
     <label class="chk-row"><input type="checkbox" name="fav" ${p.fav?"checked":""}> ★ 즐겨찾기</label>
     <label class="f">회사명 *</label><input class="in" name="name" required value="${esc(p.name)}">
