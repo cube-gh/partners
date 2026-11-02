@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1F2A44">
 <title>거래처 목록</title>
+<script>try{var t=localStorage.getItem("pl_theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
@@ -17,15 +18,26 @@
   --gold:#B8975A;--gold-ink:#8A6A34;--cat-ink:#5E4519;--gold-soft:#F3ECDD;
   --danger:#A3433A;--ok:#4A7A5C;
   --r:14px;
+  --btnbg:#1F2A44;--btnfg:#B8975A;color-scheme:light;
   --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;
 }
-@media (prefers-color-scheme:dark){:root{
+/* 다크: 휴대폰 설정이 다크이고 직접 밝게를 고르지 않았을 때, 또는 직접 다크를 골랐을 때 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#11151E;--card:#1A2030;--ink:#ECE8DF;--sub:#A2A6B0;--line:#2A3143;
   --head:#161D2E;--head-2:#1E2740;
   --pri:#CDB07A;--on-pri:#1A2030;--pri-soft:#262E42;
   --gold:#CDB07A;--gold-ink:#D6BC88;--cat-ink:#E3C892;--gold-soft:#2A2A2C;
   --danger:#E08273;--ok:#7FB592;
+  --btnbg:#CDB07A;--btnfg:#1A2030;color-scheme:dark;
 }}
+:root[data-theme="dark"]{
+  --bg:#11151E;--card:#1A2030;--ink:#ECE8DF;--sub:#A2A6B0;--line:#2A3143;
+  --head:#161D2E;--head-2:#1E2740;
+  --pri:#CDB07A;--on-pri:#1A2030;--pri-soft:#262E42;
+  --gold:#CDB07A;--gold-ink:#D6BC88;--cat-ink:#E3C892;--gold-soft:#2A2A2C;
+  --danger:#E08273;--ok:#7FB592;
+  --btnbg:#CDB07A;--btnfg:#1A2030;color-scheme:dark;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;font-size:16px}
@@ -64,17 +76,15 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .card-in{border:1px solid var(--gold);background:var(--gold-soft);border-radius:12px;padding:10px 12px;margin-bottom:6px}
 .card-in summary{font-weight:700;color:var(--gold-ink);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
 .card-in summary::-webkit-details-marker{display:none}
-.sumchev{width:22px;height:22px;border-radius:6px;background:var(--head);color:var(--gold);display:grid;place-items:center;transition:transform .2s}
+.sumchev{width:22px;height:22px;border-radius:6px;background:var(--btnbg);color:var(--btnfg);display:grid;place-items:center;transition:transform .2s}
 .card-in[open] .sumchev{transform:rotate(180deg)}
-@media (prefers-color-scheme:dark){.sumchev{background:var(--gold);color:#1A2030}}
 .card-in .note{background:var(--card)}
 .card-in textarea.in{background:var(--card)}
 .in.filled{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);transition:box-shadow .3s}
 .selwrap{position:relative}
 .selwrap select.in{appearance:none;-webkit-appearance:none;padding-right:58px;cursor:pointer;font-weight:600}
-.selbtn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:30px;border-radius:8px;background:var(--head);color:var(--gold);display:grid;place-items:center;pointer-events:none;box-shadow:0 1px 3px rgba(31,42,68,.2)}
+.selbtn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:30px;border-radius:8px;background:var(--btnbg);color:var(--btnfg);display:grid;place-items:center;pointer-events:none;box-shadow:0 1px 3px rgba(31,42,68,.2)}
 .selwrap:active .selbtn{filter:brightness(1.2)}
-@media (prefers-color-scheme:dark){.selbtn{background:var(--gold);color:#1A2030}}
 .chk-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:15px}
 .chk-row input{width:20px;height:20px;accent-color:var(--gold)}
 .call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);border:1px solid var(--line);display:grid;place-items:center;text-decoration:none}
@@ -142,6 +152,7 @@ textarea.in{height:90px;padding:10px 12px;resize:vertical}
   <div class="top">
     <div class="brand"><div class="company">(주)제주새롬여행사</div><h1>거래처 목록</h1></div>
     <span id="adminBadge" class="badge" hidden>관리자</span>
+    <button class="ibtn" id="btnTheme" aria-label="화면 밝기 바꾸기">☾</button>
     <button class="ibtn" id="btnSet" aria-label="설정">⚙︎</button>
   </div>
   <div class="search">
@@ -719,6 +730,12 @@ $("#fab").onclick=()=>editForm(null);
 $("#btnSet").onclick=settings;
 
 $("#lockForm").onsubmit=tryUnlock;
+/* ☾/☀ 다크모드 버튼: 처음엔 휴대폰 설정, 누르면 이 기기에서 기억 */
+const mqDark=matchMedia("(prefers-color-scheme: dark)");
+const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==="dark":mqDark.matches};
+function themeIcon(){$("#btnTheme").textContent=isDark()?"☀":"☾";$("#btnTheme").title=isDark()?"밝게 보기":"어둡게 보기"}
+$("#btnTheme").onclick=()=>{const t=isDark()?"light":"dark";document.documentElement.dataset.theme=t;try{localStorage.setItem("pl_theme",t)}catch(e){};themeIcon()};
+mqDark.addEventListener?.("change",themeIcon); themeIcon();
 cfg=Object.assign(cfg,lsGet(LS.cfg)||{}); pw=lsGet(LS.pw)||""; apw=lsGet(LS.apw)||""; guessRepo();
 function checkHash(){ if(location.hash==="#admin"&&!cfg.token){showAdminLock();return true} return false }
 window.addEventListener("hashchange",checkHash);
