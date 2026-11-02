@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f5c6e">
+<title>거래처 목록</title>
+<style>
+:root{
+  --bg:#f3f5f6;--card:#fff;--ink:#1b2428;--sub:#5f6d73;--line:#e2e7ea;
+  --pri:#0f5c6e;--pri-soft:#e3f0f2;--danger:#c0392b;--ok:#1e8e5a;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#111618;--card:#1b2225;--ink:#e8eef0;--sub:#9aa9ae;--line:#2b3438;
+  --pri:#5fb6c8;--pri-soft:#1d3238;--danger:#ef6b5c;--ok:#4cc38a;
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;font-size:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:10;background:var(--pri);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 16px 0}
+.top{display:flex;align-items:center;gap:8px}
+.top h1{font-size:19px;margin:0;flex:1;letter-spacing:-.3px}
+.ibtn{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:10px;height:38px;min-width:38px;padding:0 10px;font-size:15px}
+.search{margin:10px 0 8px;position:relative}
+.search input{width:100%;height:42px;border:0;border-radius:12px;padding:0 14px 0 38px;background:#fff;color:#1b2428}
+.search svg{position:absolute;left:12px;top:12px;opacity:.5}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:99px;padding:7px 13px;background:rgba(255,255,255,.15);color:#fff;font-size:14px;white-space:nowrap}
+.chip.on{background:#fff;color:var(--pri);font-weight:700}
+.chip small{opacity:.75;margin-left:3px}
+main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
+.status{font-size:13px;color:var(--sub);margin:2px 4px 10px;display:flex;justify-content:space-between;gap:8px}
+.group-title{font-size:13px;font-weight:700;color:var(--pri);margin:18px 6px 6px}
+.card{background:var(--card);border-radius:var(--r);margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.05);overflow:hidden}
+.row{display:flex;align-items:center;gap:10px;padding:13px 14px}
+.row .info{flex:1;min-width:0}
+.name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:13px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{display:inline-block;font-size:11px;background:var(--pri-soft);color:var(--pri);border-radius:6px;padding:1px 6px;margin-right:4px;font-weight:600}
+.call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;text-decoration:none}
+.detail{display:none;border-top:1px solid var(--line);padding:6px 14px 12px}
+.card.open .detail{display:block}
+.line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.line:last-child{border-bottom:0}
+.line .k{width:62px;flex:none;font-size:13px;color:var(--sub)}
+.line .v{flex:1;min-width:0;word-break:break-all}
+.line a{color:var(--pri);text-decoration:none;font-weight:600}
+.mini{flex:none;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:5px 9px;font-size:13px;color:var(--pri);text-decoration:none}
+.person{padding:9px 0;border-bottom:1px dashed var(--line)}
+.person:last-child{border-bottom:0}
+.person b{font-size:15px}.person span{font-size:13px;color:var(--sub);margin-left:4px}
+.person .acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center}
+.memo{white-space:pre-wrap;font-size:14px;background:var(--bg);border-radius:10px;padding:10px;margin-top:8px}
+.edit-row{display:flex;gap:8px;margin-top:10px}
+.btn{border:0;border-radius:11px;height:42px;padding:0 16px;background:var(--pri);color:#fff;font-weight:700}
+.btn.ghost{background:var(--bg);color:var(--ink)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+.btn.sm{height:36px;font-size:14px;padding:0 12px}
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 18px);width:58px;height:58px;border-radius:50%;border:0;background:var(--pri);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:20}
+.empty{text-align:center;color:var(--sub);padding:50px 20px;line-height:1.7}
+/* sheet */
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;z-index:31;padding:8px 16px calc(env(safe-area-inset-bottom) + 18px);transform:translateY(105%);transition:transform .22s ease;max-width:720px;margin:0 auto}
+.sheet.show{transform:none}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:4px auto 10px}
+.sheet h2{font-size:18px;margin:2px 0 12px}
+label.f{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+.in{width:100%;height:44px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:var(--bg)}
+textarea.in{height:90px;padding:10px 12px;resize:vertical}
+.pbox{border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;margin-top:8px;position:relative}
+.pbox .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pbox .in{height:40px}
+.pbox .x{position:absolute;right:6px;top:4px;border:0;background:none;color:var(--danger);font-size:13px}
+.sheet .foot{display:flex;gap:8px;margin-top:18px;position:sticky;bottom:0;background:var(--card);padding-top:8px}
+.sheet .foot .btn{flex:1}
+.catrow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.catrow .in{height:40px}
+.catrow button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:9px;height:40px;width:40px}
+.note{font-size:13px;color:var(--sub);line-height:1.6;background:var(--bg);border-radius:10px;padding:10px 12px;margin:8px 0}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1}
+.lock{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;place-items:center;padding:20px}
+.lock[hidden]{display:none}
+.lockbox{width:100%;max-width:340px;background:var(--card);border-radius:20px;padding:28px 20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.lockicon{font-size:38px}.lockbox h2{margin:6px 0 4px;font-size:20px}
+.lockbox p{color:var(--sub);font-size:14px;margin:4px 0 16px}.lockbox .small{font-size:12px;margin:14px 0 0}
+.badge{font-size:11px;background:#ffd36b;color:#5a4300;border-radius:6px;padding:2px 6px;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>거래처 목록</h1>
+    <span id="adminBadge" class="badge" hidden>관리자</span>
+    <button class="ibtn" id="btnSet" aria-label="설정">⚙︎</button>
+  </div>
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="회사명·담당자·전화번호 검색">
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<main>
+  <div class="status"><span id="count"></span><span id="sync"></span></div>
+  <div id="list"></div>
+</main>
+
+<button class="fab" id="fab" hidden aria-label="거래처 추가">+</button>
+
+<div class="lock" id="lock" hidden>
+  <form class="lockbox" id="lockForm">
+    <div class="lockicon">🔒</div>
+    <h2>거래처 목록</h2>
+    <p id="lockMsg">거래처 목록 비밀번호를 입력하세요.</p>
+    <input class="in" id="lockPw" type="password" autocomplete="current-password" placeholder="비밀번호">
+    <button class="btn" id="lockBtn" style="width:100%;margin-top:10px">열기</button>
+    <p class="small">한 번 열면 이 기기에서는 다시 묻지 않아요.</p>
+  </form>
+</div>
+<div class="dim" id="dim"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== 기본 설정 ===== */
+const DEFAULT_CATS=["여행사","항공","숙박","차량","식당","관광지","유람선","체험관광","토산품","농수산"];
+const LS={raw:"pl_raw",cfg:"pl_cfg",pw:"pl_pw"};
+const ICON_CALL='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>';
+
+let data={categories:[...DEFAULT_CATS],partners:[],updated:null};
+let cfg={owner:"",repo:"",branch:"main",path:"data.json",token:""};
+let sha=null, curCat="전체", openId=null, env=null, pw="";
+
+/* ===== 암호화 (AES-GCM + PBKDF2) ===== */
+const toB64=u=>{let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
+const fromB64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(p,salt){
+  const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function encrypt(obj,p){
+  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},await deriveKey(p,salt),new TextEncoder().encode(JSON.stringify(obj))));
+  return {enc:"AES-GCM",v:1,salt:toB64(salt),iv:toB64(iv),data:toB64(ct)};
+}
+async function decrypt(e,p){
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB64(e.iv)},await deriveKey(p,fromB64(e.salt)),fromB64(e.data));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tel=s=>String(s||"").replace(/[^0-9+]/g,"");
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const isAdmin=()=>!!(cfg.token&&cfg.owner&&cfg.repo) || !onGithub();
+function onGithub(){return /github\.io$/.test(location.hostname)}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200)}
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+/* GitHub Pages 주소면 저장소 자동 인식 (예: cube-gh.github.io/partners) */
+function guessRepo(){
+  if(!onGithub())return;
+  const owner=location.hostname.split(".")[0];
+  const repo=location.pathname.split("/").filter(Boolean)[0]||owner+".github.io";
+  if(!cfg.owner)cfg.owner=owner;
+  if(!cfg.repo)cfg.repo=repo;
+}
+
+/* ===== 불러오기 ===== */
+const b64e=s=>btoa(unescape(encodeURIComponent(s)));
+const b64d=s=>decodeURIComponent(escape(atob(s.replace(/\n/g,""))));
+function apiUrl(){return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`}
+
+async function fetchRemote(){
+  if(cfg.token&&cfg.owner){
+    const r=await fetch(apiUrl()+"?ref="+cfg.branch+"&t="+Date.now(),{headers:{Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github+json"}});
+    if(r.status===404){sha=null;setSync("저장소에 data.json 없음 — 첫 저장 시 생성");return null}
+    if(!r.ok)throw new Error("GitHub "+r.status);
+    const j=await r.json(); sha=j.sha; return JSON.parse(b64d(j.content));
+  }
+  if(location.protocol.startsWith("http")){
+    const r=await fetch("data.json?t="+Date.now());
+    if(!r.ok)throw new Error("data.json "+r.status);
+    return r.json();
+  }
+  return null;
+}
+/* 받아온 내용 적용: 잠긴 파일이면 비밀번호로 풀기 */
+async function applyRaw(raw){
+  if(raw&&raw.enc){
+    env=raw;
+    if(!pw){showLock();return false}
+    try{data=normalize(await decrypt(raw,pw));hideLock();render();return true}
+    catch(e){pw="";lsSet(LS.pw,"");showLock("비밀번호가 바뀌었어요. 새 비밀번호를 입력하세요.");return false}
+  }
+  env=null; data=normalize(raw); hideLock(); render(); return true;
+}
+async function load(){
+  const cached=lsGet(LS.raw);
+  if(cached)await applyRaw(cached); else render();
+  try{
+    const raw=await fetchRemote();
+    if(!raw){if(!cached)setSync(location.protocol.startsWith("http")?"":"이 기기에만 저장 중");return}
+    lsSet(LS.raw,raw);
+    if(await applyRaw(raw))setSync(data.updated?"업데이트 "+fmt(data.updated):"불러옴");
+  }catch(e){setSync(cached?"오프라인 사본 표시 중":"불러오기 실패");console.warn(e)}
+}
+
+/* ===== 잠금 화면 ===== */
+function showLock(msg){
+  const l=$("#lock"); l.hidden=false; $("#lockMsg").textContent=msg||"거래처 목록 비밀번호를 입력하세요.";
+  $("#list").innerHTML=""; $("#count").textContent=""; setTimeout(()=>$("#lockPw").focus(),50);
+}
+function hideLock(){$("#lock").hidden=true}
+async function tryUnlock(e){
+  e.preventDefault(); const v=$("#lockPw").value; if(!v||!env)return;
+  $("#lockBtn").disabled=true; $("#lockBtn").textContent="여는 중…";
+  try{data=normalize(await decrypt(env,v));pw=v;lsSet(LS.pw,v);$("#lockPw").value="";hideLock();render();
+    setSync(data.updated?"업데이트 "+fmt(data.updated):"")}
+  catch(err){$("#lockMsg").textContent="비밀번호가 맞지 않아요.";$("#lockPw").select()}
+  $("#lockBtn").disabled=false; $("#lockBtn").textContent="열기";
+}
+
+/* 비밀번호 정하기/바꾸기 시트 → 정해지면 resolve */
+function pwSheet(title,desc){
+  return new Promise(res=>{
+    openSheet(`<h2>${title}</h2><div class="note">${desc}</div>
+      <label class="f">새 비밀번호 (6자 이상, 숫자+글자)</label><input class="in" id="np1" type="password" autocomplete="new-password">
+      <label class="f">한 번 더</label><input class="in" id="np2" type="password" autocomplete="new-password">
+      <div class="foot"><button class="btn ghost" id="npC">취소</button><button class="btn" id="npS">확인</button></div>`);
+    $("#npC").onclick=()=>{closeSheet();res(null)};
+    $("#npS").onclick=()=>{
+      const a=$("#np1").value,b=$("#np2").value;
+      if(a.length<6||!/[0-9]/.test(a)||!/[^0-9]/.test(a)){toast("6자 이상, 숫자와 글자를 섞어 주세요");return}
+      if(a!==b){toast("두 비밀번호가 달라요");return}
+      closeSheet();res(a);
+    };
+  });
+}
+function normalize(d){
+  d=d||{}; return {categories:Array.isArray(d.categories)&&d.categories.length?d.categories:[...DEFAULT_CATS],
+    partners:Array.isArray(d.partners)?d.partners:[],updated:d.updated||null};
+}
+function fmt(iso){const d=new Date(iso);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
+function setSync(t){$("#sync").textContent=t}
+
+/* ===== 저장 ===== */
+async function save(msg){
+  if(!pw){
+    const p=await pwSheet("비밀번호 정하기","처음 저장할 때 공용 비밀번호를 정해요. 직원들은 이 비밀번호로 목록을 열어요. GitHub에는 잠긴(암호화된) 파일만 올라가요.");
+    if(!p){toast("비밀번호가 없어 저장하지 않았어요");return false}
+    pw=p; lsSet(LS.pw,p);
+  }
+  data.updated=new Date().toISOString();
+  const raw=await encrypt(data,pw); env=raw;
+  lsSet(LS.raw,raw); render();
+  if(!(cfg.token&&cfg.owner&&cfg.repo)){setSync("이 기기에 저장됨");return true}
+  setSync("저장 중…");
+  try{
+    // 최신 sha 확인 (다른 사람이 먼저 고쳤을 수 있음)
+    const g=await fetch(apiUrl()+"?ref="+cfg.branch+"&t="+Date.now(),{headers:{Authorization:"Bearer "+cfg.token}});
+    if(g.ok){sha=(await g.json()).sha}
+    const body={message:msg||"거래처 목록 수정",content:b64e(JSON.stringify(raw)),branch:cfg.branch};
+    if(sha)body.sha=sha;
+    const r=await fetch(apiUrl(),{method:"PUT",headers:{Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github+json"},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error((await r.json()).message||r.status);
+    sha=(await r.json()).content.sha;
+    setSync("GitHub 저장 완료 "+fmt(data.updated)); toast("저장했어요 (직원 화면엔 1~2분 뒤 반영)");
+    return true;
+  }catch(e){setSync("저장 실패");toast("GitHub 저장 실패: "+e.message);return false}
+}
+
+/* ===== 목록 그리기 ===== */
+function matches(p,q){
+  if(!q)return true; q=q.toLowerCase().replace(/-/g,"");
+  const hay=[p.name,p.phone,p.fax,p.email,p.memo,...(p.contacts||[]).flatMap(c=>[c.name,c.title,c.phone])].join(" ").toLowerCase().replace(/-/g,"");
+  return hay.includes(q);
+}
+function render(){
+  const q=$("#q").value.trim();
+  const counts={}; data.partners.forEach(p=>counts[p.category]=(counts[p.category]||0)+1);
+  $("#chips").innerHTML=["전체",...data.categories].map(c=>
+    `<button class="chip ${c===curCat?"on":""}" data-c="${esc(c)}">${esc(c)}<small>${c==="전체"?data.partners.length:(counts[c]||0)}</small></button>`).join("");
+  let list=data.partners.filter(p=>(curCat==="전체"||p.category===curCat)&&matches(p,q));
+  list.sort((a,b)=>a.name.localeCompare(b.name,"ko"));
+  $("#count").textContent=`${curCat} ${list.length}곳`;
+  $("#fab").hidden=!isAdmin(); $("#adminBadge").hidden=!(cfg.token&&cfg.owner);
+  if(!list.length){
+    $("#list").innerHTML=`<div class="empty">${q?"검색 결과가 없어요.":"등록된 거래처가 없어요."}${isAdmin()&&!q?"<br>오른쪽 아래 <b>+</b> 버튼으로 추가하세요.":""}</div>`;return;
+  }
+  let html="",last=null;
+  const grouped=curCat==="전체"&&!q;
+  if(grouped)list.sort((a,b)=>catIdx(a.category)-catIdx(b.category)||a.name.localeCompare(b.name,"ko"));
+  list.forEach(p=>{
+    if(grouped&&p.category!==last){html+=`<div class="group-title">${esc(p.category)}</div>`;last=p.category}
+    html+=cardHtml(p,!grouped);
+  });
+  $("#list").innerHTML=html;
+}
+function catIdx(c){const i=data.categories.indexOf(c);return i<0?999:i}
+function cardHtml(p,showTag){
+  const c0=(p.contacts||[])[0];
+  const meta=[c0&&c0.name?(c0.name+(c0.title?" "+c0.title:"")):"",p.phone].filter(Boolean).join(" · ");
+  const people=(p.contacts||[]).filter(c=>c.name||c.phone).map(c=>`
+    <div class="person"><b>${esc(c.name||"(이름 없음)")}</b><span>${esc(c.title||"")}</span>
+      <div class="acts">${c.phone?`<a class="mini" href="tel:${tel(c.phone)}">📞 ${esc(c.phone)}</a><a class="mini" href="sms:${tel(c.phone)}">문자</a>`:""}</div></div>`).join("");
+  return `<div class="card ${openId===p.id?"open":""}" data-id="${p.id}">
+    <div class="row" data-toggle>
+      <div class="info"><div class="name">${showTag?`<span class="tag">${esc(p.category)}</span>`:""}${esc(p.name)}</div>
+      <div class="meta">${esc(meta)||"&nbsp;"}</div></div>
+      ${p.phone?`<a class="call" href="tel:${tel(p.phone)}" aria-label="대표전화 걸기">${ICON_CALL}</a>`:""}
+    </div>
+    <div class="detail">
+      ${p.phone?`<div class="line"><span class="k">대표전화</span><span class="v"><a href="tel:${tel(p.phone)}">${esc(p.phone)}</a></span></div>`:""}
+      ${p.fax?`<div class="line"><span class="k">팩스</span><span class="v">${esc(p.fax)}</span><button class="mini" data-copy="${esc(p.fax)}">복사</button></div>`:""}
+      ${p.email?`<div class="line"><span class="k">이메일</span><span class="v"><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></span><button class="mini" data-copy="${esc(p.email)}">복사</button></div>`:""}
+      ${people?`<div class="line" style="display:block"><span class="k">담당자</span>${people}</div>`:""}
+      ${p.memo?`<div class="memo">${esc(p.memo)}</div>`:""}
+      ${isAdmin()?`<div class="edit-row"><button class="btn sm ghost" data-edit="${p.id}">수정</button></div>`:""}
+    </div></div>`;
+}
+
+/* ===== 시트(입력창) ===== */
+function openSheet(html){$("#sheet").innerHTML='<div class="grab"></div>'+html;$("#dim").style.display="block";requestAnimationFrame(()=>$("#sheet").classList.add("show"))}
+function closeSheet(){$("#sheet").classList.remove("show");$("#dim").style.display="none"}
+$("#dim").onclick=closeSheet;
+
+function personBox(c={}){
+  return `<div class="pbox"><button type="button" class="x" data-rmp>삭제</button>
+    <div class="grid"><input class="in" name="cn" placeholder="담당자 이름" value="${esc(c.name)}">
+    <input class="in" name="ct" placeholder="직함/부서" value="${esc(c.title)}"></div>
+    <input class="in" name="cp" type="tel" inputmode="tel" placeholder="휴대폰 / 직통" value="${esc(c.phone)}" style="margin-top:6px"></div>`;
+}
+function editForm(p){
+  const isNew=!p; p=p||{category:curCat==="전체"?data.categories[0]:curCat,contacts:[{}]};
+  openSheet(`<h2>${isNew?"거래처 추가":"거래처 수정"}</h2>
+  <form id="pf">
+    <label class="f">카테고리</label>
+    <select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select>
+    <label class="f">회사명 *</label><input class="in" name="name" required value="${esc(p.name)}">
+    <label class="f">대표전화</label><input class="in" name="phone" type="tel" inputmode="tel" value="${esc(p.phone)}">
+    <label class="f">팩스</label><input class="in" name="fax" type="tel" inputmode="tel" value="${esc(p.fax)}">
+    <label class="f">이메일</label><input class="in" name="email" type="email" value="${esc(p.email)}">
+    <label class="f">담당자</label><div id="people">${(p.contacts&&p.contacts.length?p.contacts:[{}]).map(personBox).join("")}</div>
+    <button type="button" class="btn sm ghost" id="addP" style="margin-top:8px;width:100%">+ 담당자 추가</button>
+    <label class="f">메모</label><textarea class="in" name="memo" placeholder="단가, 계약조건, 결제방법 등">${esc(p.memo)}</textarea>
+    <div class="foot">${isNew?"":`<button type="button" class="btn danger" id="delP">삭제</button>`}
+      <button type="button" class="btn ghost" id="cancel">취소</button><button class="btn">저장</button></div>
+  </form>`);
+  $("#addP").onclick=()=>$("#people").insertAdjacentHTML("beforeend",personBox());
+  $("#people").onclick=e=>{if(e.target.dataset.rmp!==undefined)e.target.closest(".pbox").remove()};
+  $("#cancel").onclick=closeSheet;
+  if(!isNew)$("#delP").onclick=async()=>{
+    if(!confirm(`'${p.name}'을(를) 삭제할까요?`))return;
+    data.partners=data.partners.filter(x=>x.id!==p.id); closeSheet(); await save("삭제: "+p.name);
+  };
+  $("#pf").onsubmit=async e=>{
+    e.preventDefault(); const f=e.target;
+    const contacts=[...f.querySelectorAll(".pbox")].map(b=>({name:b.querySelector("[name=cn]").value.trim(),title:b.querySelector("[name=ct]").value.trim(),phone:b.querySelector("[name=cp]").value.trim()})).filter(c=>c.name||c.phone);
+    const np={id:p.id||uid(),category:f.category.value,name:f.name.value.trim(),phone:f.phone.value.trim(),fax:f.fax.value.trim(),email:f.email.value.trim(),memo:f.memo.value.trim(),contacts};
+    if(isNew)data.partners.push(np); else data.partners=data.partners.map(x=>x.id===np.id?np:x);
+    openId=np.id; closeSheet(); await save((isNew?"추가: ":"수정: ")+np.name);
+  };
+}
+
+/* ===== 설정 ===== */
+function settings(){
+  openSheet(`<h2>설정</h2>
+  ${isAdmin()?`<button class="btn ghost" id="sCats" style="width:100%">카테고리 편집</button>
+  <button class="btn ghost" id="sPw" style="width:100%;margin-top:8px">공용 비밀번호 바꾸기</button>`:""}
+  ${pw?`<button class="btn ghost" id="sLock" style="width:100%;margin-top:8px">이 기기에서 잠그기</button>`:""}
+  <label class="f">관리자 로그인 (GitHub 토큰)</label>
+  <div class="note">토큰을 넣은 기기에서만 추가·수정·삭제가 돼요. 직원들은 토큰 없이 보기만 합니다.</div>
+  <input class="in" id="sOwner" placeholder="GitHub 아이디 (예: cube-gh)" value="${esc(cfg.owner)}">
+  <input class="in" id="sRepo" placeholder="저장소 이름 (예: partners)" value="${esc(cfg.repo)}" style="margin-top:6px">
+  <input class="in" id="sTok" type="password" placeholder="토큰 (github_pat_…)" value="${esc(cfg.token)}" style="margin-top:6px">
+  <div class="foot" style="position:static">
+    ${cfg.token?`<button class="btn ghost" id="sOut">로그아웃</button>`:""}<button class="btn" id="sSave">적용</button></div>
+  <label class="f" style="margin-top:22px">백업</label>
+  <div style="display:flex;gap:8px"><button class="btn ghost" id="sExp" style="flex:1">파일로 내보내기</button>
+  ${isAdmin()?`<label class="btn ghost" style="flex:1;display:grid;place-items:center">불러오기<input type="file" id="sImp" accept=".json" hidden></label>`:""}</div>`);
+  if($("#sCats"))$("#sCats").onclick=catEditor;
+  if($("#sPw"))$("#sPw").onclick=async()=>{
+    const p=await pwSheet("공용 비밀번호 바꾸기","바꾸면 모든 직원 휴대폰에서 새 비밀번호를 다시 입력해야 열려요. 퇴사자가 생겼을 때 쓰세요.");
+    if(!p)return; const old=pw; pw=p; lsSet(LS.pw,p);
+    if(!await save("비밀번호 변경")){pw=old;lsSet(LS.pw,old)} else toast("비밀번호를 바꿨어요. 직원들에게 새로 알려주세요");
+  };
+  if($("#sLock"))$("#sLock").onclick=()=>{pw="";lsSet(LS.pw,"");closeSheet();data=normalize(null);if(env)showLock();else render();toast("잠갔어요")};
+  $("#sSave").onclick=()=>{cfg.owner=$("#sOwner").value.trim();cfg.repo=$("#sRepo").value.trim();cfg.token=$("#sTok").value.trim();lsSet(LS.cfg,cfg);closeSheet();load();toast(cfg.token?"관리자 모드":"적용했어요")};
+  if($("#sOut"))$("#sOut").onclick=()=>{cfg.token="";lsSet(LS.cfg,cfg);closeSheet();render();toast("로그아웃했어요")};
+  $("#sExp").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(env||data)],{type:"application/json"}));a.download="거래처백업.json";a.click();toast(env?"잠긴 상태로 저장돼요 (같은 비밀번호로 열림)":"저장했어요")};
+  if($("#sImp"))$("#sImp").onchange=async e=>{
+    const file=e.target.files[0];if(!file)return;
+    try{let j=JSON.parse(await file.text());if(j.enc)j=await decrypt(j,pw);const d=normalize(j);if(!confirm(`${d.partners.length}곳을 불러와 지금 목록을 바꿀까요?`))return;data=d;closeSheet();await save("백업 불러오기")}
+    catch(err){toast("파일을 읽지 못했어요")}
+  };
+}
+function catEditor(){
+  const rows=c=>`<div class="catrow"><input class="in" value="${esc(c)}" data-old="${esc(c)}"><button type="button" data-up>↑</button><button type="button" data-rm>✕</button></div>`;
+  openSheet(`<h2>카테고리 편집</h2><div class="note">이름을 바꾸면 그 카테고리의 거래처도 함께 바뀌어요. 거래처가 있는 카테고리는 지울 수 없어요.</div>
+  <div id="cats">${data.categories.map(rows).join("")}</div>
+  <button class="btn sm ghost" id="cAdd" style="width:100%;margin-top:4px">+ 카테고리 추가</button>
+  <div class="foot"><button class="btn ghost" id="cCancel">취소</button><button class="btn" id="cSave">저장</button></div>`);
+  const box=$("#cats");
+  box.onclick=e=>{const r=e.target.closest(".catrow");if(!r)return;
+    if(e.target.dataset.up!==undefined&&r.previousElementSibling)box.insertBefore(r,r.previousElementSibling);
+    if(e.target.dataset.rm!==undefined){const old=r.querySelector("input").dataset.old;
+      if(old&&data.partners.some(p=>p.category===old)){toast(`'${old}'에 거래처가 있어 지울 수 없어요`);return}r.remove()}};
+  $("#cAdd").onclick=()=>{box.insertAdjacentHTML("beforeend",rows(""));box.lastElementChild.querySelector("input").focus()};
+  $("#cCancel").onclick=closeSheet;
+  $("#cSave").onclick=async()=>{
+    const ins=[...box.querySelectorAll("input")];const names=ins.map(i=>i.value.trim()).filter(Boolean);
+    if(new Set(names).size!==names.length){toast("같은 이름이 있어요");return}
+    ins.forEach(i=>{const o=i.dataset.old,n=i.value.trim();if(o&&n&&o!==n)data.partners.forEach(p=>{if(p.category===o)p.category=n})});
+    data.categories=names;if(!names.includes(curCat))curCat="전체";closeSheet();await save("카테고리 수정");
+  };
+}
+
+/* ===== 이벤트 ===== */
+$("#chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;curCat=b.dataset.c;render();window.scrollTo(0,0)};
+$("#q").oninput=render;
+$("#list").onclick=e=>{
+  if(e.target.closest("a"))return;
+  const cp=e.target.closest("[data-copy]");if(cp){navigator.clipboard?.writeText(cp.dataset.copy).then(()=>toast("복사했어요"));return}
+  const ed=e.target.closest("[data-edit]");if(ed){editForm(data.partners.find(p=>p.id===ed.dataset.edit));return}
+  const t=e.target.closest("[data-toggle]");if(t){const id=t.parentElement.dataset.id;openId=openId===id?null:id;
+    document.querySelectorAll(".card").forEach(c=>c.classList.toggle("open",c.dataset.id===openId))}
+};
+$("#fab").onclick=()=>editForm(null);
+$("#btnSet").onclick=settings;
+
+$("#lockForm").onsubmit=tryUnlock;
+cfg=Object.assign(cfg,lsGet(LS.cfg)||{}); pw=lsGet(LS.pw)||""; guessRepo(); load();
+</script>
+</body>
+</html>
