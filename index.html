@@ -113,6 +113,9 @@ textarea.in{height:90px;padding:10px 12px;resize:vertical}
 .sheet .foot .btn{flex:1}
 .catrow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
 .catrow .in{height:40px}
+.grip{flex:none;width:34px;height:40px;display:grid;place-items:center;color:var(--sub);font-size:18px;letter-spacing:-3px;cursor:grab;touch-action:none;user-select:none;border-radius:9px}
+.grip:active{cursor:grabbing;color:var(--gold-ink)}
+.catrow.dragging{position:relative;z-index:2;background:var(--card);border-radius:11px;box-shadow:0 6px 18px rgba(31,42,68,.18);outline:2px solid var(--gold)}
 .catrow button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:9px;height:40px;width:40px}
 .note{font-size:13px;color:var(--sub);line-height:1.6;background:var(--bg);border-radius:10px;padding:10px 12px;margin:8px 0}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#1F2A44;color:#F3ECDD;border:1px solid #B8975A;padding:10px 16px;border-radius:12px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
@@ -653,16 +656,31 @@ function settings(){
   };
 }
 function catEditor(){
-  const rows=c=>`<div class="catrow"><input class="in" value="${esc(c)}" data-old="${esc(c)}"><button type="button" data-up>↑</button><button type="button" data-rm>✕</button></div>`;
-  openSheet(`<h2>카테고리 편집</h2><div class="note">이름을 바꾸면 그 카테고리의 거래처도 함께 바뀌어요. 거래처가 있는 카테고리는 지울 수 없어요.</div>
+  const rows=c=>`<div class="catrow"><span class="grip" title="끌어서 순서 바꾸기">⋮⋮</span><input class="in" value="${esc(c)}" data-old="${esc(c)}"><button type="button" data-rm>✕</button></div>`;
+  openSheet(`<h2>카테고리 편집</h2><div class="note">왼쪽 <b>⋮⋮</b>를 잡고 위아래로 끌면 순서가 바뀌어요. 이름을 바꾸면 그 카테고리의 거래처도 함께 바뀌고, 거래처가 있는 카테고리는 지울 수 없어요.</div>
   <div id="cats">${data.categories.map(rows).join("")}</div>
   <button class="btn sm ghost" id="cAdd" style="width:100%;margin-top:4px">+ 카테고리 추가</button>
   <div class="foot"><button class="btn ghost" id="cCancel">취소</button><button class="btn" id="cSave">저장</button></div>`);
   const box=$("#cats");
   box.onclick=e=>{const r=e.target.closest(".catrow");if(!r)return;
-    if(e.target.dataset.up!==undefined&&r.previousElementSibling)box.insertBefore(r,r.previousElementSibling);
     if(e.target.dataset.rm!==undefined){const old=r.querySelector("input").dataset.old;
       if(old&&data.partners.some(p=>p.category===old)){toast(`'${old}'에 거래처가 있어 지울 수 없어요`);return}r.remove()}};
+  // ⋮⋮ 손잡이로 끌어서 순서 바꾸기 (터치·마우스 모두)
+  box.addEventListener("pointerdown",e=>{
+    const g=e.target.closest(".grip"); if(!g)return; e.preventDefault();
+    const row=g.parentElement, sheet=$("#sheet"); row.classList.add("dragging");
+    let timer=null, lastY=e.clientY;
+    const place=y=>{let target=null;
+      for(const s of box.children){if(s===row)continue;const r=s.getBoundingClientRect();if(y<r.top+r.height/2){target=s;break}}
+      if(target!==row.nextElementSibling||target===null)box.insertBefore(row,target)};
+    const scroll=()=>{const r=sheet.getBoundingClientRect();
+      if(lastY<r.top+70)sheet.scrollTop-=10; else if(lastY>r.bottom-90)sheet.scrollTop+=10; place(lastY)};
+    const mv=ev=>{lastY=ev.clientY;place(lastY)};
+    const up=()=>{row.classList.remove("dragging");clearInterval(timer);
+      removeEventListener("pointermove",mv);removeEventListener("pointerup",up);removeEventListener("pointercancel",up)};
+    timer=setInterval(scroll,30);
+    addEventListener("pointermove",mv);addEventListener("pointerup",up);addEventListener("pointercancel",up);
+  });
   $("#cAdd").onclick=()=>{box.insertAdjacentHTML("beforeend",rows(""));box.lastElementChild.querySelector("input").focus()};
   $("#cCancel").onclick=closeSheet;
   $("#cSave").onclick=async()=>{
