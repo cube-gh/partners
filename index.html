@@ -66,6 +66,11 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .card-in .note{background:var(--card)}
 .card-in textarea.in{background:var(--card)}
 .in.filled{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);transition:box-shadow .3s}
+.selwrap{position:relative}
+.selwrap select.in{appearance:none;-webkit-appearance:none;padding-right:58px;cursor:pointer;font-weight:600}
+.selbtn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:30px;border-radius:8px;background:var(--head);color:var(--gold);display:grid;place-items:center;pointer-events:none;box-shadow:0 1px 3px rgba(31,42,68,.2)}
+.selwrap:active .selbtn{filter:brightness(1.2)}
+@media (prefers-color-scheme:dark){.selbtn{background:var(--gold);color:#1A2030}}
 .chk-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:15px}
 .chk-row input{width:20px;height:20px;accent-color:var(--gold)}
 .call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);border:1px solid var(--line);display:grid;place-items:center;text-decoration:none}
@@ -570,7 +575,7 @@ function editForm(p){
   </details>
   <form id="pf">
     <label class="f">카테고리 선택</label>
-    <select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select>
+    <div class="selwrap"><select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select><span class="selbtn" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div>
     <label class="chk-row"><input type="checkbox" name="fav" ${p.fav?"checked":""}> ★ 즐겨찾기</label>
     <label class="f">회사명 *</label><input class="in" name="name" required value="${esc(p.name)}">
     <label class="f">대표전화</label><input class="in" name="phone" type="tel" inputmode="tel" value="${esc(p.phone)}">
