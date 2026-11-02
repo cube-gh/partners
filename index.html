@@ -456,7 +456,7 @@ function editForm(p){
   <form id="pf">
     <label class="f">카테고리</label>
     <select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select>
-    <label class="chk-row"><input type="checkbox" name="fav" ${p.fav?"checked":""}> ★ 즐겨찾기 (전 직원 화면 맨 위에 표시)</label>
+    <label class="chk-row"><input type="checkbox" name="fav" ${p.fav?"checked":""}> ★ 즐겨찾기</label>
     <label class="f">회사명 *</label><input class="in" name="name" required value="${esc(p.name)}">
     <label class="f">대표전화</label><input class="in" name="phone" type="tel" inputmode="tel" value="${esc(p.phone)}">
     <label class="f">팩스</label><input class="in" name="fax" type="tel" inputmode="tel" value="${esc(p.fax)}">
