@@ -226,9 +226,42 @@ async function writeAdminFile(viewPw,adminPw){
   const e=await encrypt({token:cfg.token,owner:cfg.owner,repo:cfg.repo,viewPw},adminPw);
   await putFile(ADMIN_FILE,e,"관리자 설정 저장");
 }
+/* 관리자 링크가 아직 없을 때: 로그인 화면에서 바로 토큰으로 처음 설정 */
+let needAdminSetup=false;
+function showTokenLock(msg){
+  lockMode="token"; $("#lock").hidden=false; $("#lockTitle").textContent="관리자 처음 설정"; $("#lockIcon").textContent="🔑";
+  $("#lockPw").value=""; $("#lockPw").placeholder="GitHub 토큰 (github_pat_…)";
+  $("#lockMsg").innerHTML=msg||"관리자 링크가 아직 만들어지지 않았어요.<br>처음 한 번만 GitHub 토큰을 붙여넣어 주세요.";
+  setTimeout(()=>$("#lockPw").focus(),50);
+}
+async function tokenSetup(t){
+  t=t.trim();
+  const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}`,{headers:{Authorization:"Bearer "+t,Accept:"application/vnd.github+json"}});
+  if(!r.ok){showTokenLock("토큰이 맞지 않거나 이 저장소 권한이 없어요.<br>토큰을 다시 확인해 주세요.");return}
+  const j=await r.json();
+  if(j.permissions&&!j.permissions.push){showTokenLock("이 토큰은 수정 권한이 없어요.<br>Contents를 'Read and write'로 다시 발급해 주세요.");return}
+  cfg.token=t; lsSet(LS.cfg,cfg); lockMode="view"; needAdminSetup=true; $("#lockPw").value="";
+  hideLock(); await load();
+  if($("#lock").hidden)finishAdminSetup(); // 잠금이 없으면 바로, 있으면 직원용 비밀번호 입력 뒤 진행
+}
+async function finishAdminSetup(){
+  needAdminSetup=false;
+  toast("토큰 확인 완료. 이제 관리자 비밀번호를 정해요");
+  await makeAdminLink();
+}
+async function makeAdminLink(){
+  if(!pw){
+    const v=await pwSheet("1단계: 직원용 공용 비밀번호","직원들이 목록을 볼 때 쓰는 비밀번호예요.");
+    if(!v)return false; pw=v; lsSet(LS.pw,v); if(!await save("비밀번호 설정"))return false;
+  }
+  const a=await pwSheet("관리자 비밀번호 정하기","직원용 비밀번호와 다르게 정하세요. 관리자 링크를 연 사람이 이 비밀번호를 넣어야 수정할 수 있어요.");
+  if(!a)return false; if(a===pw){toast("직원용 비밀번호와 다르게 정해 주세요");return makeAdminLink()}
+  try{await writeAdminFile(pw,a);apw=a;lsSet(LS.apw,a);render();toast("관리자 링크 준비 완료! ⚙︎ 설정에서 링크를 복사하세요");return true}
+  catch(e){toast("저장 실패: "+e.message);return false}
+}
 async function adminLogin(v){
   const a=await fetchAdminFile();
-  if(!a){$("#lockMsg").textContent="관리자 링크가 아직 설정되지 않았어요.";return}
+  if(!a){showTokenLock();return}
   let s; try{s=await decrypt(a,v)}catch(e){$("#lockMsg").textContent="관리자 비밀번호가 맞지 않아요.";$("#lockPw").select();return}
   cfg.token=s.token; cfg.owner=s.owner||cfg.owner; cfg.repo=s.repo||cfg.repo; lsSet(LS.cfg,cfg);
   apw=v; lsSet(LS.apw,v);
@@ -287,11 +320,14 @@ function hideLock(){$("#lock").hidden=true}
 async function tryUnlock(e){
   e.preventDefault(); const v=$("#lockPw").value; if(!v)return;
   $("#lockBtn").disabled=true; $("#lockBtn").textContent="여는 중…";
+  if(lockMode==="token"){try{await tokenSetup(v)}catch(err){showTokenLock("확인 실패: "+esc(err.message))}
+    $("#lockBtn").disabled=false;$("#lockBtn").textContent="열기";return}
   if(lockMode==="admin"){try{await adminLogin(v)}catch(err){$("#lockMsg").textContent="불러오기 실패: "+err.message}
     $("#lockBtn").disabled=false;$("#lockBtn").textContent="열기";return}
   if(!env){$("#lockBtn").disabled=false;$("#lockBtn").textContent="열기";return}
   try{data=normalize(await decrypt(env,v));pw=v;readPw=v;lsSet(LS.pw,v);$("#lockPw").value="";hideLock();render();
-    setSync(data.updated?"업데이트 "+fmt(data.updated):"")}
+    setSync(data.updated?"업데이트 "+fmt(data.updated):"");
+    if(needAdminSetup&&cfg.token)setTimeout(finishAdminSetup,300)}
   catch(err){$("#lockMsg").textContent="비밀번호가 맞지 않아요.";$("#lockPw").select()}
   $("#lockBtn").disabled=false; $("#lockBtn").textContent="열기";
 }
@@ -484,16 +520,8 @@ function settings(){
   };
   if($("#sCopy"))$("#sCopy").onclick=()=>navigator.clipboard?.writeText(adminLink()).then(()=>toast("관리자 링크를 복사했어요"));
   if($("#sAdm"))$("#sAdm").onclick=()=>{closeSheet();showAdminLock()};
-  if($("#sMake"))$("#sMake").onclick=async()=>{
-    if(!pw){
-      const v=await pwSheet("1단계: 직원용 공용 비밀번호","직원들이 목록을 볼 때 쓰는 비밀번호예요.");
-      if(!v)return; pw=v; lsSet(LS.pw,v); if(!await save("비밀번호 설정"))return;
-    }
-    const a=await pwSheet("관리자 비밀번호 정하기","직원용 비밀번호와 다르게 정하세요. 관리자 링크를 연 사람이 이 비밀번호를 넣어야 수정할 수 있어요.");
-    if(!a)return; if(a===pw){toast("직원용 비밀번호와 다르게 정해 주세요");return}
-    try{await writeAdminFile(pw,a);apw=a;lsSet(LS.apw,a);toast("관리자 링크를 만들었어요");settings()}
-    catch(e){toast("저장 실패: "+e.message)}
-  };
+  if($("#sMake"))$("#sMake").onclick=async()=>{if(await makeAdminLink())settings()};
+
   if($("#sApw"))$("#sApw").onclick=async()=>{
     const a=await pwSheet("관리자 비밀번호 바꾸기","바꾸면 다른 기기의 관리자도 새 비밀번호로 다시 로그인해야 해요. (이미 로그인된 기기는 '관리자 로그아웃' 전까지 유지돼요)");
     if(!a)return; if(a===pw){toast("직원용 비밀번호와 다르게 정해 주세요");return}
