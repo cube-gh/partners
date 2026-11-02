@@ -88,7 +88,9 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .dim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}
 .sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;z-index:31;padding:8px 16px calc(env(safe-area-inset-bottom) + 18px);transform:translateY(105%);transition:transform .22s ease;max-width:720px;margin:0 auto}
 .sheet.show{transform:none}
-.grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:4px auto 10px}
+.grabzone{position:sticky;top:-8px;z-index:3;margin:-8px -16px 4px;padding:12px 0 10px;background:var(--card);cursor:grab;touch-action:none}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto}
+.sheet h2{touch-action:none;user-select:none}
 .sheet h2{font-family:var(--serif);font-weight:600;font-size:19px;margin:2px 0 12px}
 label.f{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
 .in{width:100%;height:44px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:var(--bg)}
@@ -444,8 +446,32 @@ function cardHtml(p,showTag){
 }
 
 /* ===== 시트(입력창) ===== */
-function openSheet(html){$("#sheet").innerHTML='<div class="grab"></div>'+html;$("#dim").style.display="block";requestAnimationFrame(()=>$("#sheet").classList.add("show"))}
-function closeSheet(){$("#sheet").classList.remove("show");$("#dim").style.display="none"}
+function openSheet(html){const sh=$("#sheet");sh.style.transform="";sh.innerHTML='<div class="grabzone"><div class="grab"></div></div>'+html;sh.scrollTop=0;$("#dim").style.display="block";$("#dim").style.opacity="";requestAnimationFrame(()=>sh.classList.add("show"))}
+function closeSheet(){const sh=$("#sheet");sh.classList.remove("show");sh.style.transform="";$("#dim").style.display="none";$("#dim").style.opacity=""}
+
+/* 손잡이(위쪽 회색 막대)나 제목을 아래로 쓸어내리면 닫기 */
+(function(){
+  const sh=$("#sheet"); let y0=null,dy=0,t0=0;
+  const pt=e=>(e.touches?e.touches[0]:e).clientY;
+  function start(e){y0=pt(e);dy=0;t0=Date.now();sh.style.transition="none"}
+  function move(e){
+    if(y0===null)return; dy=Math.max(0,pt(e)-y0);
+    sh.style.transform=`translateY(${dy}px)`; $("#dim").style.opacity=String(Math.max(.15,1-dy/350));
+    if(e.cancelable)e.preventDefault();
+  }
+  function end(){
+    if(y0===null)return; y0=null; sh.style.transition="";
+    const fast=dy/Math.max(1,Date.now()-t0)>0.5;
+    if(dy>110||(fast&&dy>30))closeSheet(); else{sh.style.transform="";$("#dim").style.opacity=""}
+  }
+  const handle=e=>e.target.closest(".grabzone,.sheet h2");
+  sh.addEventListener("touchstart",e=>{if(handle(e))start(e)},{passive:true});
+  sh.addEventListener("touchmove",move,{passive:false});
+  sh.addEventListener("touchend",end); sh.addEventListener("touchcancel",end);
+  sh.addEventListener("mousedown",e=>{ if(!handle(e))return; start(e);
+    const mm=ev=>move(ev),mu=()=>{end();removeEventListener("mousemove",mm);removeEventListener("mouseup",mu)};
+    addEventListener("mousemove",mm);addEventListener("mouseup",mu)});
+})();
 $("#dim").onclick=closeSheet;
 
 function personBox(c={}){
