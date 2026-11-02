@@ -62,7 +62,11 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .chip.fav{color:#E9D3A6}
 .chip.fav.on{color:#1F2A44}
 .card-in{border:1px solid var(--gold);background:var(--gold-soft);border-radius:12px;padding:10px 12px;margin-bottom:6px}
-.card-in summary{font-weight:700;color:var(--gold-ink);cursor:pointer}
+.card-in summary{font-weight:700;color:var(--gold-ink);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.card-in summary::-webkit-details-marker{display:none}
+.sumchev{width:22px;height:22px;border-radius:6px;background:var(--head);color:var(--gold);display:grid;place-items:center;transition:transform .2s}
+.card-in[open] .sumchev{transform:rotate(180deg)}
+@media (prefers-color-scheme:dark){.sumchev{background:var(--gold);color:#1A2030}}
 .card-in .note{background:var(--card)}
 .card-in textarea.in{background:var(--card)}
 .in.filled{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);transition:box-shadow .3s}
@@ -563,7 +567,7 @@ function fillFromCard(text){
 function editForm(p){
   const isNew=!p; p=p||{category:curCat==="전체"?data.categories[0]:curCat,contacts:[{}]};
   openSheet(`<h2>${isNew?"거래처 추가":"거래처 수정"}</h2>
-  <details class="card-in" ${isNew?"open":""}><summary>📇 명함으로 채우기</summary>
+  <details class="card-in"><summary><span class="sumchev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>📇 명함으로 채우기</summary>
     <div class="note" style="margin:8px 0 6px">휴대폰 카메라로 명함 글자를 복사해 아래에 붙여넣으세요.<br>
     · 아이폰: 카메라로 명함 비추기 → 오른쪽 아래 글자 아이콘 → 모두 선택 → 복사<br>
     · 갤럭시: 카메라로 비추기 → <b>T</b> 아이콘(텍스트 추출) → 복사<br>
