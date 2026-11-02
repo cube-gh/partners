@@ -7,14 +7,14 @@
 <title>거래처 목록</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* 딥 네이비 + 골드 */
 :root{
   --bg:#F5F3EE;--card:#FFFFFF;--ink:#1E2433;--sub:#6E7280;--line:#E7E2D7;
   --head:#1F2A44;--head-2:#26324F;
   --pri:#1F2A44;--on-pri:#FFFFFF;--pri-soft:#EEEAE1;
-  --gold:#B8975A;--gold-ink:#8A6A34;--gold-soft:#F3ECDD;
+  --gold:#B8975A;--gold-ink:#8A6A34;--cat-ink:#5E4519;--gold-soft:#F3ECDD;
   --danger:#A3433A;--ok:#4A7A5C;
   --r:14px;
   --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;
@@ -23,7 +23,7 @@
   --bg:#11151E;--card:#1A2030;--ink:#ECE8DF;--sub:#A2A6B0;--line:#2A3143;
   --head:#161D2E;--head-2:#1E2740;
   --pri:#CDB07A;--on-pri:#1A2030;--pri-soft:#262E42;
-  --gold:#CDB07A;--gold-ink:#D6BC88;--gold-soft:#2A2A2C;
+  --gold:#CDB07A;--gold-ink:#D6BC88;--cat-ink:#E3C892;--gold-soft:#2A2A2C;
   --danger:#E08273;--ok:#7FB592;
 }}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -47,8 +47,8 @@ header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--
 .chip small{opacity:.75;margin-left:3px}
 main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .status{font-size:13px;color:var(--sub);margin:2px 4px 10px;display:flex;justify-content:space-between;gap:8px}
-.group-title{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--gold-ink);margin:20px 6px 8px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
-.group-title::after{content:"";flex:1;height:1px;background:var(--line)}
+.group-title{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--cat-ink);margin:20px 6px 8px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.group-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),var(--line) 40%)}
 .card{background:var(--card);border-radius:var(--r);margin-bottom:8px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(31,42,68,.04);overflow:hidden}
 .row{display:flex;align-items:center;gap:10px;padding:13px 14px}
 .row .info{flex:1;min-width:0}
