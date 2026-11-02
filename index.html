@@ -61,6 +61,11 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .fav-mark{color:var(--gold);margin-right:4px}
 .chip.fav{color:#E9D3A6}
 .chip.fav.on{color:#1F2A44}
+.card-in{border:1px solid var(--gold);background:var(--gold-soft);border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.card-in summary{font-weight:700;color:var(--gold-ink);cursor:pointer}
+.card-in .note{background:var(--card)}
+.card-in textarea.in{background:var(--card)}
+.in.filled{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);transition:box-shadow .3s}
 .chk-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:15px}
 .chk-row input{width:20px;height:20px;accent-color:var(--gold)}
 .call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);border:1px solid var(--line);display:grid;place-items:center;text-decoration:none}
@@ -480,9 +485,86 @@ function personBox(c={}){
     <input class="in" name="ct" placeholder="직함/부서" value="${esc(c.title)}"></div>
     <input class="in" name="cp" type="tel" inputmode="tel" placeholder="휴대폰 / 직통" value="${esc(c.phone)}" style="margin-top:6px"></div>`;
 }
+/* ===== 명함 글자 → 칸 자동 분류 ===== */
+const TITLES="대표이사|대표|회장|사장|부사장|전무|상무|이사|본부장|센터장|지사장|지점장|소장|원장|국장|실장|부장|차장|과장|팀장|대리|계장|주임|사원|매니저|지배인|총지배인|점장|파트장|선임|책임|수석|기장|가이드|Manager|Director|CEO|President";
+const DEPT=/[가-힣A-Za-z]+(부|팀|실|과|본부|센터|사업부|지점|지사|파트)$/;
+const COMPANY=/(\(주\)|㈜|주식회사|유한회사|\(유\)|여행사|여행|관광|투어|항공|에어|호텔|리조트|펜션|콘도|렌트|렌터카|버스|운수|교통|식당|횟집|레스토랑|가든|유람선|크루즈|마린|농장|농원|수산|영농|토산|특산|체험|랜드|월드|파크|Co\.|Corp|Inc|Ltd|Hotel|Resort|Tour)/i;
+function parseCard(text){
+  const r={phone:"",fax:"",email:"",company:"",name:"",title:"",mobile:"",extra:[]};
+  const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  const phoneRe=/(\+?82[-.\s]?)?0\d{1,2}[-.)\s]?\d{3,4}[-.\s]?\d{4}|1[5-9]\d{2}[-.\s]?\d{4}/g;
+  const norm=n=>{n=n.replace(/^\+?82[-.\s]?/,"0").replace(/[^0-9]/g,"");
+    if(/^02/.test(n))return n.replace(/^(02)(\d{3,4})(\d{4})$/,"$1-$2-$3");
+    if(/^1[5-9]/.test(n))return n.replace(/^(\d{4})(\d{4})$/,"$1-$2");
+    return n.replace(/^(0\d{2})(\d{3,4})(\d{4})$/,"$1-$2-$3")};
+  const rest=[];
+  lines.forEach(line=>{
+    let used=false;
+    const em=line.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/); if(em&&!r.email){r.email=em[0];used=true}
+    // 한 줄에 번호가 여러 개일 수 있음 (T. 064-.. F. 064-..)
+    const parts=line.split(/(?=(?:T|Tel|TEL|F|Fax|FAX|M|Mobile|H\.?P|C\.?P|전화|팩스|휴대폰|핸드폰|대표전화|직통)\s*[.:)]?\s*\+?\d)/);
+    parts.forEach(pt=>{
+      const nums=pt.match(phoneRe); if(!nums)return; used=true;
+      nums.forEach(raw=>{
+        const n=norm(raw), lab=pt.slice(0,pt.indexOf(raw));
+        if(/fax|팩스|^\s*F\b/i.test(lab)){if(!r.fax)r.fax=n}
+        else if(/mobile|휴대|핸드폰|H\.?P|C\.?P|^\s*M\b/i.test(lab)||/^01[016789]/.test(n)){if(!r.mobile)r.mobile=n}
+        else if(!r.phone)r.phone=n; else if(!r.fax)r.fax=n;
+      });
+    });
+    if(!used&&/www\.|https?:\/\/|\.(com|co\.kr|kr|net)\b/i.test(line)){r.extra.push("홈페이지: "+line.replace(/^(web|homepage|홈페이지)\s*[.:]?\s*/i,""));used=true}
+    if(!used&&/(주소|Add|특별자치도|[가-힣]+(시|군|구)\s|[가-힣\d]+(로|길)\s*\d)/.test(line)&&line.length>8){r.extra.push("주소: "+line.replace(/^(주소|Add(ress)?)\s*[.:]?\s*/i,""));used=true}
+    if(!used)rest.push(line);
+  });
+  const tRe=new RegExp("("+TITLES+")","i");
+  rest.forEach(line=>{
+    if(!r.company&&COMPANY.test(line)&&!tRe.test(line.replace(/대표전화/,""))){r.company=line;return}
+    if(tRe.test(line)){
+      const endT=new RegExp("("+TITLES+")$","i");
+      const toks=line.split(/[\s/|·,]+/).filter(Boolean);
+      const tt=toks.filter(w=>endT.test(w)||DEPT.test(w));
+      if(!r.title&&tt.length)r.title=tt.join(" ");
+      if(!r.name){const nm=toks.find(w=>/^[가-힣]{2,4}$/.test(w)&&!endT.test(w)&&!DEPT.test(w));if(nm)r.name=nm}
+      return;
+    }
+    if(!r.name&&/^[가-힣]{2,4}$/.test(line.replace(/\s/g,""))&&line.replace(/\s/g,"").length<=4){r.name=line.replace(/\s/g,"");return}
+    if(!r.company&&COMPANY.test(line)){r.company=line;return}
+  });
+  if(!r.company){const c=rest.find(l=>l!==r.name&&!tRe.test(l)&&!/^[가-힣]{2,4}$/.test(l.replace(/\s/g,"")));if(c)r.company=c}
+  return r;
+}
+function fillFromCard(text){
+  if(!text.trim()){toast("먼저 명함 글자를 붙여넣어 주세요");return}
+  const r=parseCard(text), f=$("#pf"), hit=[];
+  const set=(el,v)=>{if(v&&el&&!el.value.trim()){el.value=v;hit.push(el)}};
+  set(f.name,r.company); set(f.phone,r.phone); set(f.fax,r.fax); set(f.email,r.email);
+  if(r.name||r.mobile||r.title){
+    let box=[...f.querySelectorAll(".pbox")].find(b=>![...b.querySelectorAll("input")].some(i=>i.value.trim()));
+    if(!box){$("#people").insertAdjacentHTML("beforeend",personBox());box=[...f.querySelectorAll(".pbox")].pop()}
+    set(box.querySelector("[name=cn]"),r.name); set(box.querySelector("[name=ct]"),r.title); set(box.querySelector("[name=cp]"),r.mobile);
+  }
+  if(r.extra.length){const m=f.memo;const add=r.extra.join("\n");if(!m.value.includes(add)){m.value=(m.value?m.value+"\n":"")+add;hit.push(m)}}
+  // 카테고리 추측
+  const guess=[["숙박",/호텔|리조트|펜션|콘도|게스트|모텔|스테이|Hotel|Resort/i],["항공",/항공|에어|Air/i],["차량",/렌트|렌터카|버스|운수|교통|택시|모빌리티/],["유람선",/유람선|크루즈|요트|잠수함|마린/],["식당",/식당|횟집|레스토랑|가든|흑돼지|국수|해장|카페|밥상/],["체험관광",/체험|승마|카트|레저|랜드|농장 체험/],["토산품",/토산|특산|기념품|감귤|초콜릿/],["농수산",/농장|농원|수산|영농|과원|양식/],["관광지",/박물관|미술관|공원|파크|월드|테마|식물원|동굴/],["여행사",/여행사|여행|투어|Tour/i]];
+  const g=guess.find(([c,re])=>data.categories.includes(c)&&re.test(r.company+" "+text));
+  if(g&&f.category.value!==g[0]&&!f.name.dataset.touched){f.category.value=g[0];hit.push(f.category)}
+  hit.forEach(el=>{el.classList.add("filled");setTimeout(()=>el.classList.remove("filled"),2500)});
+  $(".card-in").open=false;
+  toast(hit.length?`${hit.length}칸을 채웠어요. 확인 후 저장하세요`:"알아본 내용이 없어요. 직접 입력해 주세요");
+}
 function editForm(p){
   const isNew=!p; p=p||{category:curCat==="전체"?data.categories[0]:curCat,contacts:[{}]};
   openSheet(`<h2>${isNew?"거래처 추가":"거래처 수정"}</h2>
+  <details class="card-in" ${isNew?"open":""}><summary>📇 명함으로 채우기</summary>
+    <div class="note" style="margin:8px 0 6px">휴대폰 카메라로 명함 글자를 복사해 아래에 붙여넣으세요.<br>
+    · 아이폰: 카메라로 명함 비추기 → 오른쪽 아래 글자 아이콘 → 모두 선택 → 복사<br>
+    · 갤럭시: 카메라로 비추기 → <b>T</b> 아이콘(텍스트 추출) → 복사<br>
+    · 그 외: 구글 렌즈 → 텍스트 → 복사</div>
+    <textarea class="in" id="cardTxt" placeholder="여기에 명함 글자를 붙여넣기" style="height:96px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button type="button" class="btn sm ghost" id="cardPaste" style="flex:1">📋 붙여넣기</button>
+      <button type="button" class="btn sm" id="cardFill" style="flex:1">칸 채우기</button></div>
+  </details>
   <form id="pf">
     <label class="f">카테고리 선택</label>
     <select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select>
@@ -498,6 +580,9 @@ function editForm(p){
       <button type="button" class="btn ghost" id="cancel">취소</button><button class="btn">저장</button></div>
   </form>`);
   $("#addP").onclick=()=>$("#people").insertAdjacentHTML("beforeend",personBox());
+  $("#cardPaste").onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$("#cardTxt").value=t;toast("붙여넣었어요")}else toast("복사된 글자가 없어요")}
+    catch(e){$("#cardTxt").focus();toast("글자칸을 길게 눌러 '붙여넣기'를 선택하세요")}};
+  $("#cardFill").onclick=()=>fillFromCard($("#cardTxt").value);
   $("#people").onclick=e=>{if(e.target.dataset.rmp!==undefined)e.target.closest(".pbox").remove()};
   $("#cancel").onclick=closeSheet;
   if(!isNew)$("#delP").onclick=async()=>{
