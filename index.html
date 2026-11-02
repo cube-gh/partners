@@ -32,7 +32,9 @@ html,body{margin:0;background:var(--bg);color:var(--ink);
 button,input,select,textarea{font:inherit;color:inherit}
 header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--head-2),var(--head));color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 0;border-bottom:2px solid var(--gold)}
 .top{display:flex;align-items:center;gap:8px}
-.top h1{font-family:var(--serif);font-weight:600;font-size:21px;margin:0;flex:1;letter-spacing:.5px}
+.brand{flex:1;min-width:0}
+.company{font-size:11.5px;color:var(--gold);letter-spacing:1.5px;margin:0 0 3px 12px;font-weight:600}
+.top h1{font-family:var(--serif);font-weight:600;font-size:21px;margin:0;letter-spacing:.5px}
 .top h1::before{content:"";display:inline-block;width:3px;height:16px;background:var(--gold);margin-right:9px;vertical-align:-1px;border-radius:2px}
 .ibtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#E9DFC9;border-radius:10px;height:38px;min-width:38px;padding:0 10px;font-size:15px}
 .search{margin:12px 0 8px;position:relative}
@@ -53,6 +55,14 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .meta{font-size:13px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tag{display:inline-block;font-size:11px;background:var(--gold-soft);color:var(--gold-ink);border-radius:6px;padding:1px 6px;margin-right:4px;font-weight:600}
+.star{flex:none;width:36px;height:44px;border:0;background:none;font-size:22px;color:var(--line);padding:0;line-height:1}
+.star.on{color:var(--gold)}
+.star:disabled{opacity:1}
+.fav-mark{color:var(--gold);margin-right:4px}
+.chip.fav{color:#E9D3A6}
+.chip.fav.on{color:#1F2A44}
+.chk-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:15px}
+.chk-row input{width:20px;height:20px;accent-color:var(--gold)}
 .call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);border:1px solid var(--line);display:grid;place-items:center;text-decoration:none}
 .detail{display:none;border-top:1px solid var(--line);padding:6px 14px 12px}
 .card.open .detail{display:block}
@@ -107,7 +117,7 @@ textarea.in{height:90px;padding:10px 12px;resize:vertical}
 <body>
 <header>
   <div class="top">
-    <h1>거래처 목록</h1>
+    <div class="brand"><div class="company">(주)제주새롬여행사</div><h1>거래처 목록</h1></div>
     <span id="adminBadge" class="badge" hidden>관리자</span>
     <button class="ibtn" id="btnSet" aria-label="설정">⚙︎</button>
   </div>
@@ -346,18 +356,23 @@ function matches(p,q){
 function render(){
   const q=$("#q").value.trim();
   const counts={}; data.partners.forEach(p=>counts[p.category]=(counts[p.category]||0)+1);
-  $("#chips").innerHTML=["전체",...data.categories].map(c=>
+  const favN=data.partners.filter(p=>p.fav).length;
+  $("#chips").innerHTML=`<button class="chip fav ${curCat==="__fav"?"on":""}" data-c="__fav">★ 즐겨찾기<small>${favN}</small></button>`+["전체",...data.categories].map(c=>
     `<button class="chip ${c===curCat?"on":""}" data-c="${esc(c)}">${esc(c)}<small>${c==="전체"?data.partners.length:(counts[c]||0)}</small></button>`).join("");
-  let list=data.partners.filter(p=>(curCat==="전체"||p.category===curCat)&&matches(p,q));
+  let list=data.partners.filter(p=>(curCat==="전체"||(curCat==="__fav"?p.fav:p.category===curCat))&&matches(p,q));
   list.sort((a,b)=>a.name.localeCompare(b.name,"ko"));
-  $("#count").textContent=`${curCat} ${list.length}곳`;
+  $("#count").textContent=`${curCat==="__fav"?"즐겨찾기":curCat} ${list.length}곳`;
   $("#fab").hidden=!isAdmin(); $("#adminBadge").hidden=!(cfg.token&&cfg.owner);
   if(!list.length){
-    $("#list").innerHTML=`<div class="empty">${q?"검색 결과가 없어요.":"등록된 거래처가 없어요."}${isAdmin()&&!q?"<br>오른쪽 아래 <b>+</b> 버튼으로 추가하세요.":""}</div>`;return;
+    $("#list").innerHTML=`<div class="empty">${q?"검색 결과가 없어요.":curCat==="__fav"?"즐겨찾기한 거래처가 없어요."+(isAdmin()?"<br>거래처 옆 ☆를 누르면 추가돼요.":""):"등록된 거래처가 없어요."}${isAdmin()&&!q?"<br>오른쪽 아래 <b>+</b> 버튼으로 추가하세요.":""}</div>`;return;
   }
   let html="",last=null;
   const grouped=curCat==="전체"&&!q;
-  if(grouped)list.sort((a,b)=>catIdx(a.category)-catIdx(b.category)||a.name.localeCompare(b.name,"ko"));
+  if(grouped){
+    list.sort((a,b)=>catIdx(a.category)-catIdx(b.category)||a.name.localeCompare(b.name,"ko"));
+    const favs=list.filter(p=>p.fav).sort((a,b)=>a.name.localeCompare(b.name,"ko"));
+    if(favs.length){html+=`<div class="group-title">★ 즐겨찾기</div>`+favs.map(p=>cardHtml(p,true)).join("");list=list.filter(p=>!p.fav)}
+  }
   list.forEach(p=>{
     if(grouped&&p.category!==last){html+=`<div class="group-title">${esc(p.category)}</div>`;last=p.category}
     html+=cardHtml(p,!grouped);
@@ -373,8 +388,9 @@ function cardHtml(p,showTag){
       <div class="acts">${c.phone?`<a class="mini" href="tel:${tel(c.phone)}">📞 ${esc(c.phone)}</a><a class="mini" href="sms:${tel(c.phone)}">문자</a>`:""}</div></div>`).join("");
   return `<div class="card ${openId===p.id?"open":""}" data-id="${p.id}">
     <div class="row" data-toggle>
-      <div class="info"><div class="name">${showTag?`<span class="tag">${esc(p.category)}</span>`:""}${esc(p.name)}</div>
+      <div class="info"><div class="name">${p.fav&&!isAdmin()?`<span class="fav-mark">★</span>`:""}${showTag?`<span class="tag">${esc(p.category)}</span>`:""}${esc(p.name)}</div>
       <div class="meta">${esc(meta)||"&nbsp;"}</div></div>
+      ${isAdmin()?`<button class="star ${p.fav?"on":""}" data-fav="${p.id}" aria-label="즐겨찾기">${p.fav?"★":"☆"}</button>`:""}
       ${p.phone?`<a class="call" href="tel:${tel(p.phone)}" aria-label="대표전화 걸기">${ICON_CALL}</a>`:""}
     </div>
     <div class="detail">
@@ -404,6 +420,7 @@ function editForm(p){
   <form id="pf">
     <label class="f">카테고리</label>
     <select class="in" name="category">${data.categories.map(c=>`<option ${c===p.category?"selected":""}>${esc(c)}</option>`).join("")}</select>
+    <label class="chk-row"><input type="checkbox" name="fav" ${p.fav?"checked":""}> ★ 즐겨찾기 (전 직원 화면 맨 위에 표시)</label>
     <label class="f">회사명 *</label><input class="in" name="name" required value="${esc(p.name)}">
     <label class="f">대표전화</label><input class="in" name="phone" type="tel" inputmode="tel" value="${esc(p.phone)}">
     <label class="f">팩스</label><input class="in" name="fax" type="tel" inputmode="tel" value="${esc(p.fax)}">
@@ -424,7 +441,7 @@ function editForm(p){
   $("#pf").onsubmit=async e=>{
     e.preventDefault(); const f=e.target;
     const contacts=[...f.querySelectorAll(".pbox")].map(b=>({name:b.querySelector("[name=cn]").value.trim(),title:b.querySelector("[name=ct]").value.trim(),phone:b.querySelector("[name=cp]").value.trim()})).filter(c=>c.name||c.phone);
-    const np={id:p.id||uid(),category:f.category.value,name:f.name.value.trim(),phone:f.phone.value.trim(),fax:f.fax.value.trim(),email:f.email.value.trim(),memo:f.memo.value.trim(),contacts};
+    const np={id:p.id||uid(),category:f.category.value,name:f.name.value.trim(),phone:f.phone.value.trim(),fax:f.fax.value.trim(),email:f.email.value.trim(),memo:f.memo.value.trim(),contacts,fav:f.fav.checked};
     openId=np.id; closeSheet();
     await save((isNew?"추가: ":"수정: ")+np.name,d=>{const i=d.partners.findIndex(x=>x.id===np.id);if(i<0)d.partners.push(np);else d.partners[i]=np});
   };
@@ -521,6 +538,9 @@ $("#q").oninput=render;
 $("#list").onclick=e=>{
   if(e.target.closest("a"))return;
   const cp=e.target.closest("[data-copy]");if(cp){navigator.clipboard?.writeText(cp.dataset.copy).then(()=>toast("복사했어요"));return}
+  const fv=e.target.closest("[data-fav]");
+  if(fv){const id=fv.dataset.fav,cur=data.partners.find(p=>p.id===id);if(!cur)return;const on=!cur.fav;
+    cur.fav=on;render();save((on?"즐겨찾기 추가: ":"즐겨찾기 해제: ")+cur.name,d=>{const x=d.partners.find(p=>p.id===id);if(x)x.fav=on});return}
   const ed=e.target.closest("[data-edit]");if(ed){editForm(data.partners.find(p=>p.id===ed.dataset.edit));return}
   const t=e.target.closest("[data-toggle]");if(t){const id=t.parentElement.dataset.id;openId=openId===id?null:id;
     document.querySelectorAll(".card").forEach(c=>c.classList.toggle("open",c.dataset.id===openId))}
