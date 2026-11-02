@@ -3,44 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f5c6e">
+<meta name="theme-color" content="#1F2A44">
 <title>거래처 목록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
 <style>
+/* 딥 네이비 + 골드 */
 :root{
-  --bg:#f3f5f6;--card:#fff;--ink:#1b2428;--sub:#5f6d73;--line:#e2e7ea;
-  --pri:#0f5c6e;--pri-soft:#e3f0f2;--danger:#c0392b;--ok:#1e8e5a;
+  --bg:#F5F3EE;--card:#FFFFFF;--ink:#1E2433;--sub:#6E7280;--line:#E7E2D7;
+  --head:#1F2A44;--head-2:#26324F;
+  --pri:#1F2A44;--on-pri:#FFFFFF;--pri-soft:#EEEAE1;
+  --gold:#B8975A;--gold-ink:#8A6A34;--gold-soft:#F3ECDD;
+  --danger:#A3433A;--ok:#4A7A5C;
   --r:14px;
+  --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#111618;--card:#1b2225;--ink:#e8eef0;--sub:#9aa9ae;--line:#2b3438;
-  --pri:#5fb6c8;--pri-soft:#1d3238;--danger:#ef6b5c;--ok:#4cc38a;
+  --bg:#11151E;--card:#1A2030;--ink:#ECE8DF;--sub:#A2A6B0;--line:#2A3143;
+  --head:#161D2E;--head-2:#1E2740;
+  --pri:#CDB07A;--on-pri:#1A2030;--pri-soft:#262E42;
+  --gold:#CDB07A;--gold-ink:#D6BC88;--gold-soft:#2A2A2C;
+  --danger:#E08273;--ok:#7FB592;
 }}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;font-size:16px}
 button,input,select,textarea{font:inherit;color:inherit}
-header{position:sticky;top:0;z-index:10;background:var(--pri);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 16px 0}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--head-2),var(--head));color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 0;border-bottom:2px solid var(--gold)}
 .top{display:flex;align-items:center;gap:8px}
-.top h1{font-size:19px;margin:0;flex:1;letter-spacing:-.3px}
-.ibtn{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:10px;height:38px;min-width:38px;padding:0 10px;font-size:15px}
-.search{margin:10px 0 8px;position:relative}
-.search input{width:100%;height:42px;border:0;border-radius:12px;padding:0 14px 0 38px;background:#fff;color:#1b2428}
+.top h1{font-family:var(--serif);font-weight:600;font-size:21px;margin:0;flex:1;letter-spacing:.5px}
+.top h1::before{content:"";display:inline-block;width:3px;height:16px;background:var(--gold);margin-right:9px;vertical-align:-1px;border-radius:2px}
+.ibtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#E9DFC9;border-radius:10px;height:38px;min-width:38px;padding:0 10px;font-size:15px}
+.search{margin:12px 0 8px;position:relative}
+.search input{width:100%;height:42px;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:0 14px 0 38px;background:rgba(255,255,255,.95);color:#1E2433}
 .search svg{position:absolute;left:12px;top:12px;opacity:.5}
 .chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:none;border:0;border-radius:99px;padding:7px 13px;background:rgba(255,255,255,.15);color:#fff;font-size:14px;white-space:nowrap}
-.chip.on{background:#fff;color:var(--pri);font-weight:700}
+.chip{flex:none;border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:6px 13px;background:transparent;color:rgba(255,255,255,.82);font-size:14px;white-space:nowrap}
+.chip.on{background:var(--gold);border-color:var(--gold);color:#1F2A44;font-weight:700}
 .chip small{opacity:.75;margin-left:3px}
 main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .status{font-size:13px;color:var(--sub);margin:2px 4px 10px;display:flex;justify-content:space-between;gap:8px}
-.group-title{font-size:13px;font-weight:700;color:var(--pri);margin:18px 6px 6px}
-.card{background:var(--card);border-radius:var(--r);margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.05);overflow:hidden}
+.group-title{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--gold-ink);margin:20px 6px 8px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.group-title::after{content:"";flex:1;height:1px;background:var(--line)}
+.card{background:var(--card);border-radius:var(--r);margin-bottom:8px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(31,42,68,.04);overflow:hidden}
 .row{display:flex;align-items:center;gap:10px;padding:13px 14px}
 .row .info{flex:1;min-width:0}
 .name{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .meta{font-size:13px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tag{display:inline-block;font-size:11px;background:var(--pri-soft);color:var(--pri);border-radius:6px;padding:1px 6px;margin-right:4px;font-weight:600}
-.call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);display:grid;place-items:center;text-decoration:none}
+.tag{display:inline-block;font-size:11px;background:var(--gold-soft);color:var(--gold-ink);border-radius:6px;padding:1px 6px;margin-right:4px;font-weight:600}
+.call{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pri-soft);color:var(--pri);border:1px solid var(--line);display:grid;place-items:center;text-decoration:none}
 .detail{display:none;border-top:1px solid var(--line);padding:6px 14px 12px}
 .card.open .detail{display:block}
 .line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
@@ -55,20 +68,21 @@ main{padding:12px 12px 110px;max-width:720px;margin:0 auto}
 .person .acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;align-items:center}
 .memo{white-space:pre-wrap;font-size:14px;background:var(--bg);border-radius:10px;padding:10px;margin-top:8px}
 .edit-row{display:flex;gap:8px;margin-top:10px}
-.btn{border:0;border-radius:11px;height:42px;padding:0 16px;background:var(--pri);color:#fff;font-weight:700}
-.btn.ghost{background:var(--bg);color:var(--ink)}
+.btn{border:0;border-radius:11px;height:42px;padding:0 16px;background:var(--pri);color:var(--on-pri);font-weight:700}
+.btn.ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
 .btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
 .btn.sm{height:36px;font-size:14px;padding:0 12px}
-.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 18px);width:58px;height:58px;border-radius:50%;border:0;background:var(--pri);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:20}
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 18px);width:58px;height:58px;border-radius:50%;border:0;background:var(--head);color:var(--gold);font-size:30px;box-shadow:0 0 0 2px var(--gold),0 8px 20px rgba(31,42,68,.3);z-index:20}
 .empty{text-align:center;color:var(--sub);padding:50px 20px;line-height:1.7}
 /* sheet */
 .dim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;display:none}
 .sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--card);border-radius:20px 20px 0 0;z-index:31;padding:8px 16px calc(env(safe-area-inset-bottom) + 18px);transform:translateY(105%);transition:transform .22s ease;max-width:720px;margin:0 auto}
 .sheet.show{transform:none}
 .grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:4px auto 10px}
-.sheet h2{font-size:18px;margin:2px 0 12px}
+.sheet h2{font-family:var(--serif);font-weight:600;font-size:19px;margin:2px 0 12px}
 label.f{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
 .in{width:100%;height:44px;border:1px solid var(--line);border-radius:11px;padding:0 12px;background:var(--bg)}
+.in:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
 textarea.in{height:90px;padding:10px 12px;resize:vertical}
 .pbox{border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;margin-top:8px;position:relative}
 .pbox .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -80,14 +94,14 @@ textarea.in{height:90px;padding:10px 12px;resize:vertical}
 .catrow .in{height:40px}
 .catrow button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:9px;height:40px;width:40px}
 .note{font-size:13px;color:var(--sub);line-height:1.6;background:var(--bg);border-radius:10px;padding:10px 12px;margin:8px 0}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#1F2A44;color:#F3ECDD;border:1px solid #B8975A;padding:10px 16px;border-radius:12px;font-size:14px;z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1}
 .lock{position:fixed;inset:0;z-index:40;background:var(--bg);display:grid;place-items:center;padding:20px}
 .lock[hidden]{display:none}
-.lockbox{width:100%;max-width:340px;background:var(--card);border-radius:20px;padding:28px 20px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08)}
-.lockicon{font-size:38px}.lockbox h2{margin:6px 0 4px;font-size:20px}
+.lockbox{width:100%;max-width:340px;background:var(--card);border-radius:20px;padding:28px 20px;text-align:center;border:1px solid var(--line);border-top:3px solid var(--gold);box-shadow:0 8px 28px rgba(31,42,68,.08)}
+.lockicon{font-size:38px}.lockbox h2{margin:6px 0 4px;font-size:21px;font-family:var(--serif);font-weight:600;letter-spacing:.5px}
 .lockbox p{color:var(--sub);font-size:14px;margin:4px 0 16px}.lockbox .small{font-size:12px;margin:14px 0 0}
-.badge{font-size:11px;background:#ffd36b;color:#5a4300;border-radius:6px;padding:2px 6px;font-weight:700}
+.badge{font-size:11px;background:transparent;color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:2px 7px;font-weight:700;letter-spacing:.5px}
 </style>
 </head>
 <body>
@@ -113,8 +127,8 @@ textarea.in{height:90px;padding:10px 12px;resize:vertical}
 
 <div class="lock" id="lock" hidden>
   <form class="lockbox" id="lockForm">
-    <div class="lockicon">🔒</div>
-    <h2>거래처 목록</h2>
+    <div class="lockicon" id="lockIcon">🔒</div>
+    <h2 id="lockTitle">거래처 목록</h2>
     <p id="lockMsg">거래처 목록 비밀번호를 입력하세요.</p>
     <input class="in" id="lockPw" type="password" autocomplete="current-password" placeholder="비밀번호">
     <button class="btn" id="lockBtn" style="width:100%;margin-top:10px">열기</button>
@@ -128,12 +142,12 @@ textarea.in{height:90px;padding:10px 12px;resize:vertical}
 <script>
 /* ===== 기본 설정 ===== */
 const DEFAULT_CATS=["여행사","항공","숙박","차량","식당","관광지","유람선","체험관광","토산품","농수산"];
-const LS={raw:"pl_raw",cfg:"pl_cfg",pw:"pl_pw"};
+const LS={raw:"pl_raw",cfg:"pl_cfg",pw:"pl_pw",apw:"pl_apw"};
 const ICON_CALL='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>';
 
 let data={categories:[...DEFAULT_CATS],partners:[],updated:null};
 let cfg={owner:"",repo:"",branch:"main",path:"data.json",token:""};
-let sha=null, curCat="전체", openId=null, env=null, pw="";
+let sha=null, curCat="전체", openId=null, env=null, pw="", apw="", lockMode="view", readPw="";
 
 /* ===== 암호화 (AES-GCM + PBKDF2) ===== */
 const toB64=u=>{let s="";for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)};
@@ -174,7 +188,43 @@ function guessRepo(){
 /* ===== 불러오기 ===== */
 const b64e=s=>btoa(unescape(encodeURIComponent(s)));
 const b64d=s=>decodeURIComponent(escape(atob(s.replace(/\n/g,""))));
-function apiUrl(){return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`}
+function apiUrl(p){return `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${p||cfg.path}`}
+/* GitHub에 파일 쓰기 (최신 sha 확인 후 덮어쓰기) */
+async function putFile(path,obj,msg){
+  const h={Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github+json"};
+  let s=null; const g=await fetch(apiUrl(path)+"?ref="+cfg.branch+"&t="+Date.now(),{headers:h});
+  if(g.ok)s=(await g.json()).sha;
+  const body={message:msg,content:b64e(JSON.stringify(obj)),branch:cfg.branch}; if(s)body.sha=s;
+  const r=await fetch(apiUrl(path),{method:"PUT",headers:h,body:JSON.stringify(body)});
+  if(!r.ok)throw new Error((await r.json()).message||r.status);
+  return (await r.json()).content.sha;
+}
+
+/* ===== 관리자 링크 (admin.json = 관리자 비밀번호로 잠근 토큰) ===== */
+const ADMIN_FILE="admin.json";
+const adminLink=()=>location.origin+location.pathname+"#admin";
+async function fetchAdminFile(){
+  let r=await fetch(ADMIN_FILE+"?t="+Date.now()).catch(()=>null);
+  if(r&&r.ok)return r.json();
+  if(cfg.owner&&cfg.repo){ // Pages 반영 전이면 GitHub에서 직접
+    r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${ADMIN_FILE}?t=${Date.now()}`).catch(()=>null);
+    if(r&&r.ok)return JSON.parse(b64d((await r.json()).content));
+  }
+  return null;
+}
+async function writeAdminFile(viewPw,adminPw){
+  const e=await encrypt({token:cfg.token,owner:cfg.owner,repo:cfg.repo,viewPw},adminPw);
+  await putFile(ADMIN_FILE,e,"관리자 설정 저장");
+}
+async function adminLogin(v){
+  const a=await fetchAdminFile();
+  if(!a){$("#lockMsg").textContent="관리자 링크가 아직 설정되지 않았어요.";return}
+  let s; try{s=await decrypt(a,v)}catch(e){$("#lockMsg").textContent="관리자 비밀번호가 맞지 않아요.";$("#lockPw").select();return}
+  cfg.token=s.token; cfg.owner=s.owner||cfg.owner; cfg.repo=s.repo||cfg.repo; lsSet(LS.cfg,cfg);
+  apw=v; lsSet(LS.apw,v);
+  if(s.viewPw){pw=s.viewPw; lsSet(LS.pw,pw)}
+  lockMode="view"; $("#lockPw").value=""; hideLock(); toast("관리자로 로그인했어요"); load();
+}
 
 async function fetchRemote(){
   if(cfg.token&&cfg.owner){
@@ -195,7 +245,7 @@ async function applyRaw(raw){
   if(raw&&raw.enc){
     env=raw;
     if(!pw){showLock();return false}
-    try{data=normalize(await decrypt(raw,pw));hideLock();render();return true}
+    try{data=normalize(await decrypt(raw,pw));readPw=pw;hideLock();render();return true}
     catch(e){pw="";lsSet(LS.pw,"");showLock("비밀번호가 바뀌었어요. 새 비밀번호를 입력하세요.");return false}
   }
   env=null; data=normalize(raw); hideLock(); render(); return true;
@@ -213,14 +263,24 @@ async function load(){
 
 /* ===== 잠금 화면 ===== */
 function showLock(msg){
-  const l=$("#lock"); l.hidden=false; $("#lockMsg").textContent=msg||"거래처 목록 비밀번호를 입력하세요.";
+  if(lockMode==="admin")return showAdminLock();
+  const l=$("#lock"); l.hidden=false; $("#lockTitle").textContent="거래처 목록"; $("#lockIcon").textContent="🔒";
+  $("#lockPw").placeholder="비밀번호"; $("#lockMsg").textContent=msg||"거래처 목록 비밀번호를 입력하세요.";
   $("#list").innerHTML=""; $("#count").textContent=""; setTimeout(()=>$("#lockPw").focus(),50);
+}
+function showAdminLock(){
+  lockMode="admin"; $("#lock").hidden=false; $("#lockTitle").textContent="관리자 로그인"; $("#lockIcon").textContent="🛠️";
+  $("#lockPw").placeholder="관리자 비밀번호"; $("#lockMsg").textContent="관리자 비밀번호를 입력하세요.";
+  setTimeout(()=>$("#lockPw").focus(),50);
 }
 function hideLock(){$("#lock").hidden=true}
 async function tryUnlock(e){
-  e.preventDefault(); const v=$("#lockPw").value; if(!v||!env)return;
+  e.preventDefault(); const v=$("#lockPw").value; if(!v)return;
   $("#lockBtn").disabled=true; $("#lockBtn").textContent="여는 중…";
-  try{data=normalize(await decrypt(env,v));pw=v;lsSet(LS.pw,v);$("#lockPw").value="";hideLock();render();
+  if(lockMode==="admin"){try{await adminLogin(v)}catch(err){$("#lockMsg").textContent="불러오기 실패: "+err.message}
+    $("#lockBtn").disabled=false;$("#lockBtn").textContent="열기";return}
+  if(!env){$("#lockBtn").disabled=false;$("#lockBtn").textContent="열기";return}
+  try{data=normalize(await decrypt(env,v));pw=v;readPw=v;lsSet(LS.pw,v);$("#lockPw").value="";hideLock();render();
     setSync(data.updated?"업데이트 "+fmt(data.updated):"")}
   catch(err){$("#lockMsg").textContent="비밀번호가 맞지 않아요.";$("#lockPw").select()}
   $("#lockBtn").disabled=false; $("#lockBtn").textContent="열기";
@@ -250,26 +310,28 @@ function fmt(iso){const d=new Date(iso);return `${d.getMonth()+1}/${d.getDate()}
 function setSync(t){$("#sync").textContent=t}
 
 /* ===== 저장 ===== */
-async function save(msg){
+async function save(msg,mutate){
   if(!pw){
     const p=await pwSheet("비밀번호 정하기","처음 저장할 때 공용 비밀번호를 정해요. 직원들은 이 비밀번호로 목록을 열어요. GitHub에는 잠긴(암호화된) 파일만 올라가요.");
     if(!p){toast("비밀번호가 없어 저장하지 않았어요");return false}
     pw=p; lsSet(LS.pw,p);
   }
-  data.updated=new Date().toISOString();
+  const remote=!!(cfg.token&&cfg.owner&&cfg.repo);
+  // 다른 관리자가 먼저 고친 내용을 덮어쓰지 않도록, 최신 목록을 받아 그 위에 변경을 적용
+  let base=data;
+  if(remote){
+    setSync("최신 목록 확인 중…");
+    try{const r=await fetchRemote(); if(r)base=r.enc?normalize(await decrypt(r,readPw||pw)):normalize(r)}
+    catch(e){setSync("저장 안 됨");toast("최신 목록을 열지 못해 저장을 멈췄어요. 새로고침 후 다시 해 주세요");return false}
+  }
+  base=JSON.parse(JSON.stringify(base)); if(mutate)mutate(base);
+  base.updated=new Date().toISOString(); data=base;
   const raw=await encrypt(data,pw); env=raw;
   lsSet(LS.raw,raw); render();
-  if(!(cfg.token&&cfg.owner&&cfg.repo)){setSync("이 기기에 저장됨");return true}
+  if(!remote){readPw=pw;setSync("이 기기에 저장됨");return true}
   setSync("저장 중…");
   try{
-    // 최신 sha 확인 (다른 사람이 먼저 고쳤을 수 있음)
-    const g=await fetch(apiUrl()+"?ref="+cfg.branch+"&t="+Date.now(),{headers:{Authorization:"Bearer "+cfg.token}});
-    if(g.ok){sha=(await g.json()).sha}
-    const body={message:msg||"거래처 목록 수정",content:b64e(JSON.stringify(raw)),branch:cfg.branch};
-    if(sha)body.sha=sha;
-    const r=await fetch(apiUrl(),{method:"PUT",headers:{Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github+json"},body:JSON.stringify(body)});
-    if(!r.ok)throw new Error((await r.json()).message||r.status);
-    sha=(await r.json()).content.sha;
+    sha=await putFile(cfg.path,raw,msg||"거래처 목록 수정"); readPw=pw;
     setSync("GitHub 저장 완료 "+fmt(data.updated)); toast("저장했어요 (직원 화면엔 1~2분 뒤 반영)");
     return true;
   }catch(e){setSync("저장 실패");toast("GitHub 저장 실패: "+e.message);return false}
@@ -357,14 +419,14 @@ function editForm(p){
   $("#cancel").onclick=closeSheet;
   if(!isNew)$("#delP").onclick=async()=>{
     if(!confirm(`'${p.name}'을(를) 삭제할까요?`))return;
-    data.partners=data.partners.filter(x=>x.id!==p.id); closeSheet(); await save("삭제: "+p.name);
+    closeSheet(); await save("삭제: "+p.name,d=>{d.partners=d.partners.filter(x=>x.id!==p.id)});
   };
   $("#pf").onsubmit=async e=>{
     e.preventDefault(); const f=e.target;
     const contacts=[...f.querySelectorAll(".pbox")].map(b=>({name:b.querySelector("[name=cn]").value.trim(),title:b.querySelector("[name=ct]").value.trim(),phone:b.querySelector("[name=cp]").value.trim()})).filter(c=>c.name||c.phone);
     const np={id:p.id||uid(),category:f.category.value,name:f.name.value.trim(),phone:f.phone.value.trim(),fax:f.fax.value.trim(),email:f.email.value.trim(),memo:f.memo.value.trim(),contacts};
-    if(isNew)data.partners.push(np); else data.partners=data.partners.map(x=>x.id===np.id?np:x);
-    openId=np.id; closeSheet(); await save((isNew?"추가: ":"수정: ")+np.name);
+    openId=np.id; closeSheet();
+    await save((isNew?"추가: ":"수정: ")+np.name,d=>{const i=d.partners.findIndex(x=>x.id===np.id);if(i<0)d.partners.push(np);else d.partners[i]=np});
   };
 }
 
@@ -374,29 +436,59 @@ function settings(){
   ${isAdmin()?`<button class="btn ghost" id="sCats" style="width:100%">카테고리 편집</button>
   <button class="btn ghost" id="sPw" style="width:100%;margin-top:8px">공용 비밀번호 바꾸기</button>`:""}
   ${pw?`<button class="btn ghost" id="sLock" style="width:100%;margin-top:8px">이 기기에서 잠그기</button>`:""}
-  <label class="f">관리자 로그인 (GitHub 토큰)</label>
-  <div class="note">토큰을 넣은 기기에서만 추가·수정·삭제가 돼요. 직원들은 토큰 없이 보기만 합니다.</div>
-  <input class="in" id="sOwner" placeholder="GitHub 아이디 (예: cube-gh)" value="${esc(cfg.owner)}">
+
+  <label class="f" style="margin-top:22px">관리자</label>
+  ${cfg.token?`
+    ${apw?`<div class="note">아래 링크를 관리자에게 보내고, 관리자 비밀번호는 따로 알려주세요. 링크만으로는 수정할 수 없어요.</div>
+      <div style="display:flex;gap:6px"><input class="in" readonly value="${esc(adminLink())}"><button class="btn sm" id="sCopy" style="height:44px;flex:none;white-space:nowrap">복사</button></div>
+      <button class="btn ghost" id="sApw" style="width:100%;margin-top:8px">관리자 비밀번호 바꾸기</button>`
+    :`<div class="note">관리자 링크를 만들면 다른 휴대폰·PC에서도 링크 + 관리자 비밀번호로 수정할 수 있어요.</div>
+      <button class="btn" id="sMake" style="width:100%">관리자 링크 만들기</button>`}
+    <button class="btn ghost" id="sOut" style="width:100%;margin-top:8px">관리자 로그아웃</button>`
+  : onGithub()?`<button class="btn ghost" id="sAdm" style="width:100%">관리자 로그인</button>`:`<div class="note">GitHub에 올린 뒤 아래 '처음 설정'에서 토큰을 넣으면 관리자 링크를 만들 수 있어요.</div>`}
+
+  <details style="margin-top:14px"><summary style="font-size:14px;color:var(--sub)">처음 설정 (GitHub 토큰 직접 입력)</summary>
+  <input class="in" id="sOwner" placeholder="GitHub 아이디 (예: cube-gh)" value="${esc(cfg.owner)}" style="margin-top:8px">
   <input class="in" id="sRepo" placeholder="저장소 이름 (예: partners)" value="${esc(cfg.repo)}" style="margin-top:6px">
   <input class="in" id="sTok" type="password" placeholder="토큰 (github_pat_…)" value="${esc(cfg.token)}" style="margin-top:6px">
-  <div class="foot" style="position:static">
-    ${cfg.token?`<button class="btn ghost" id="sOut">로그아웃</button>`:""}<button class="btn" id="sSave">적용</button></div>
+  <button class="btn" id="sSave" style="width:100%;margin-top:8px">적용</button></details>
+
   <label class="f" style="margin-top:22px">백업</label>
   <div style="display:flex;gap:8px"><button class="btn ghost" id="sExp" style="flex:1">파일로 내보내기</button>
   ${isAdmin()?`<label class="btn ghost" style="flex:1;display:grid;place-items:center">불러오기<input type="file" id="sImp" accept=".json" hidden></label>`:""}</div>`);
   if($("#sCats"))$("#sCats").onclick=catEditor;
   if($("#sPw"))$("#sPw").onclick=async()=>{
     const p=await pwSheet("공용 비밀번호 바꾸기","바꾸면 모든 직원 휴대폰에서 새 비밀번호를 다시 입력해야 열려요. 퇴사자가 생겼을 때 쓰세요.");
-    if(!p)return; const old=pw; pw=p; lsSet(LS.pw,p);
-    if(!await save("비밀번호 변경")){pw=old;lsSet(LS.pw,old)} else toast("비밀번호를 바꿨어요. 직원들에게 새로 알려주세요");
+    if(!p)return; if(p===apw){toast("관리자 비밀번호와 다르게 정해 주세요");return}
+    const old=pw; pw=p; lsSet(LS.pw,p);
+    if(!await save("비밀번호 변경")){pw=old;lsSet(LS.pw,old);return}
+    if(apw&&cfg.token){try{await writeAdminFile(p,apw)}catch(e){toast("관리자 설정 저장 실패: "+e.message);return}}
+    toast("비밀번호를 바꿨어요. 직원들에게 새로 알려주세요");
+  };
+  if($("#sCopy"))$("#sCopy").onclick=()=>navigator.clipboard?.writeText(adminLink()).then(()=>toast("관리자 링크를 복사했어요"));
+  if($("#sAdm"))$("#sAdm").onclick=()=>{closeSheet();showAdminLock()};
+  if($("#sMake"))$("#sMake").onclick=async()=>{
+    if(!pw){
+      const v=await pwSheet("1단계: 직원용 공용 비밀번호","직원들이 목록을 볼 때 쓰는 비밀번호예요.");
+      if(!v)return; pw=v; lsSet(LS.pw,v); if(!await save("비밀번호 설정"))return;
+    }
+    const a=await pwSheet("관리자 비밀번호 정하기","직원용 비밀번호와 다르게 정하세요. 관리자 링크를 연 사람이 이 비밀번호를 넣어야 수정할 수 있어요.");
+    if(!a)return; if(a===pw){toast("직원용 비밀번호와 다르게 정해 주세요");return}
+    try{await writeAdminFile(pw,a);apw=a;lsSet(LS.apw,a);toast("관리자 링크를 만들었어요");settings()}
+    catch(e){toast("저장 실패: "+e.message)}
+  };
+  if($("#sApw"))$("#sApw").onclick=async()=>{
+    const a=await pwSheet("관리자 비밀번호 바꾸기","바꾸면 다른 기기의 관리자도 새 비밀번호로 다시 로그인해야 해요. (이미 로그인된 기기는 '관리자 로그아웃' 전까지 유지돼요)");
+    if(!a)return; if(a===pw){toast("직원용 비밀번호와 다르게 정해 주세요");return}
+    try{await writeAdminFile(pw,a);apw=a;lsSet(LS.apw,a);toast("관리자 비밀번호를 바꿨어요")}catch(e){toast("저장 실패: "+e.message)}
   };
   if($("#sLock"))$("#sLock").onclick=()=>{pw="";lsSet(LS.pw,"");closeSheet();data=normalize(null);if(env)showLock();else render();toast("잠갔어요")};
   $("#sSave").onclick=()=>{cfg.owner=$("#sOwner").value.trim();cfg.repo=$("#sRepo").value.trim();cfg.token=$("#sTok").value.trim();lsSet(LS.cfg,cfg);closeSheet();load();toast(cfg.token?"관리자 모드":"적용했어요")};
-  if($("#sOut"))$("#sOut").onclick=()=>{cfg.token="";lsSet(LS.cfg,cfg);closeSheet();render();toast("로그아웃했어요")};
+  if($("#sOut"))$("#sOut").onclick=()=>{cfg.token="";apw="";lsSet(LS.cfg,cfg);lsSet(LS.apw,"");closeSheet();render();toast("관리자에서 로그아웃했어요")};
   $("#sExp").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(env||data)],{type:"application/json"}));a.download="거래처백업.json";a.click();toast(env?"잠긴 상태로 저장돼요 (같은 비밀번호로 열림)":"저장했어요")};
   if($("#sImp"))$("#sImp").onchange=async e=>{
     const file=e.target.files[0];if(!file)return;
-    try{let j=JSON.parse(await file.text());if(j.enc)j=await decrypt(j,pw);const d=normalize(j);if(!confirm(`${d.partners.length}곳을 불러와 지금 목록을 바꿀까요?`))return;data=d;closeSheet();await save("백업 불러오기")}
+    try{let j=JSON.parse(await file.text());if(j.enc)j=await decrypt(j,pw);const d=normalize(j);if(!confirm(`${d.partners.length}곳을 불러와 지금 목록을 바꿀까요?`))return;closeSheet();await save("백업 불러오기",x=>{x.categories=d.categories;x.partners=d.partners})}
     catch(err){toast("파일을 읽지 못했어요")}
   };
 }
@@ -416,8 +508,10 @@ function catEditor(){
   $("#cSave").onclick=async()=>{
     const ins=[...box.querySelectorAll("input")];const names=ins.map(i=>i.value.trim()).filter(Boolean);
     if(new Set(names).size!==names.length){toast("같은 이름이 있어요");return}
-    ins.forEach(i=>{const o=i.dataset.old,n=i.value.trim();if(o&&n&&o!==n)data.partners.forEach(p=>{if(p.category===o)p.category=n})});
-    data.categories=names;if(!names.includes(curCat))curCat="전체";closeSheet();await save("카테고리 수정");
+    const ren=ins.map(i=>[i.dataset.old,i.value.trim()]).filter(([o,n])=>o&&n&&o!==n);
+    if(!names.includes(curCat))curCat="전체";closeSheet();
+    await save("카테고리 수정",d=>{ren.forEach(([o,n])=>d.partners.forEach(p=>{if(p.category===o)p.category=n}));
+      d.partners.forEach(p=>{if(!names.includes(p.category))names.push(p.category)}); d.categories=names});
   };
 }
 
@@ -435,7 +529,10 @@ $("#fab").onclick=()=>editForm(null);
 $("#btnSet").onclick=settings;
 
 $("#lockForm").onsubmit=tryUnlock;
-cfg=Object.assign(cfg,lsGet(LS.cfg)||{}); pw=lsGet(LS.pw)||""; guessRepo(); load();
+cfg=Object.assign(cfg,lsGet(LS.cfg)||{}); pw=lsGet(LS.pw)||""; apw=lsGet(LS.apw)||""; guessRepo();
+function checkHash(){ if(location.hash==="#admin"&&!cfg.token){showAdminLock();return true} return false }
+window.addEventListener("hashchange",checkHash);
+if(!checkHash())load();
 </script>
 </body>
 </html>
